@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Sitemap: https://hacomoji.com/sitemap.xml
+
+# クローラーに対する指示
+# すべてのコンテンツにアクセスを許可

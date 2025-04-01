@@ -1,0 +1,405 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    color: #1976D2;
+    margin-bottom: 5px;
+}
+
+header p {
+    font-size: 1rem;
+    color: #666;
+}
+
+.input-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+#text-input {
+    width: 60%;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+    outline: none;
+}
+
+#generate-btn {
+    padding: 10px 20px;
+    background-color: #1976D2;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+#generate-btn:hover {
+    background-color: #1565C0;
+}
+
+.view-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+@media (min-width: 768px) {
+    .view-container {
+        flex-direction: row;
+    }
+}
+
+#three-d-view {
+    flex: 1;
+    height: 500px;
+    background-color: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    touch-action: none; /* タッチイベントの競合を防止 */
+}
+
+/* モバイル表示のための追加スタイル */
+@media (max-width: 767px) {
+    #three-d-view {
+        height: 350px; /* モバイルでは高さを調整 */
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    #three-d-view canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+    }
+}
+
+.controls {
+    width: 100%;
+    padding: 20px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transform-style: flat;
+    perspective: none;
+    transform: none;
+    position: static;
+}
+
+@media (min-width: 768px) {
+    .controls {
+        width: 300px;
+    }
+}
+
+.collapsible-section {
+    margin-bottom: 15px;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: white;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.section-header:hover {
+    background-color: #f0f0f0;
+}
+
+.section-header.open {
+    background-color: #e8f0fe;
+    border-bottom: 1px solid #d0e0fc;
+}
+
+.section-header h3 {
+    margin: 0;
+    color: #1976D2;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.toggle-icon {
+    color: #1976D2;
+    font-size: 0.9rem;
+    transition: transform 0.3s;
+}
+
+.section-header.open .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.section-content {
+    padding: 15px;
+    background-color: white;
+    transition: max-height 0.3s ease-out;
+}
+
+.export-group {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.export-group h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #1976D2;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.control-item {
+    margin-bottom: 15px;
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    position: static;
+    transform: none;
+}
+
+/* モバイル表示のレイアウト調整 */
+@media (max-width: 767px) {
+    .control-item {
+        grid-template-columns: 90px 1fr auto;
+        gap: 5px;
+    }
+    
+    .control-item label {
+        font-size: 0.85rem;
+    }
+    
+    .bevel-control, .material-control {
+        padding-left: 10px;
+    }
+    
+    .bevel-control label, .material-control label {
+        padding-left: 5px;
+    }
+}
+
+.control-item label {
+    grid-column: 1;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.control-item input[type="range"] {
+    grid-column: 2;
+    width: 100%;
+    margin-right: 0;
+}
+
+.value-display {
+    grid-column: 3;
+    width: 30px;
+    text-align: right;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.control-item input[type="color"] {
+    grid-column: 2;
+    width: 40px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.control-item select {
+    grid-column: 2 / span 2;
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+    height: 30px;
+    background-color: white;
+}
+
+/* チェックボックスのスタイル調整 */
+.control-item input[type="checkbox"] {
+    grid-column: 2;
+    margin: 0;
+}
+
+/* セレクトボックスのスタイル調整 */
+.control-item select {
+    position: static !important;
+    z-index: auto !important;
+    appearance: menulist !important;
+    -webkit-appearance: menulist !important;
+    -moz-appearance: menulist !important;
+    transform: none !important;
+    transform-style: flat !important;
+    perspective: none !important;
+    /* Safari用の追加対策 */
+    -webkit-transform: none !important;
+    -webkit-transform-style: flat !important;
+    -webkit-perspective: none !important;
+}
+
+/* Firefox用の追加対策 */
+@-moz-document url-prefix() {
+    .control-item select {
+        position: relative !important;
+        transform: none !important;
+    }
+}
+
+/* Chrome用の追加対策 */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .control-item select {
+        position: relative !important;
+        transform: none !important;
+    }
+}
+
+/* 削除：重複したスタイル定義 */
+
+.bevel-control, .material-control, .texture-control, .shadow-control, .light-control {
+    padding-left: 20px;
+}
+
+.bevel-control label, .material-control label, .texture-control label, .shadow-control label, .light-control label {
+    padding-left: 10px;
+}
+
+/* テクスチャコントロールの初期状態 */
+.texture-control {
+    display: none;
+}
+
+/* カスタムテクスチャコンテナのスタイル */
+#custom-texture-container {
+    display: none;
+}
+
+/* ファイル入力のスタイル調整 */
+.texture-control input[type="file"] {
+    grid-column: 2 / span 2;
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* テクスチャ情報のスタイル */
+.texture-info {
+    grid-column: 2 / span 2;
+    display: block;
+    font-size: 0.8rem;
+    color: #777;
+    margin-top: 5px;
+    margin-left: 2px;
+}
+
+/* 入れ子になったコントロールのグリッド調整 */
+.bevel-control input[type="range"],
+.material-control input[type="range"],
+.texture-control input[type="range"] {
+    grid-column: 2;
+}
+
+.bevel-control .value-display,
+.material-control .value-display,
+.texture-control .value-display {
+    grid-column: 3;
+}
+
+.export-group button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.export-group button:hover {
+    background-color: #43A047;
+}
+
+#export-obj {
+    background-color: #FF9800;
+}
+
+#export-obj:hover {
+    background-color: #F57C00;
+}
+
+#export-png {
+    background-color: #9C27B0;
+}
+
+#export-png:hover {
+    background-color: #7B1FA2;
+}
+
+/* フッタースタイル */
+.footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    background-color: #f0f0f0;
+    border-top: 1px solid #ddd;
+    text-align: center;
+}
+
+.footer p {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.footer a {
+    color: #1976D2;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer a:hover {
+    color: #1565C0;
+    text-decoration: underline;
+}

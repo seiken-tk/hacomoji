@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>箱モジ（hacomoji） - 3Dテキストジェネレーター</title>
+    
+    <!-- メタタグ -->
+    <meta name="description" content="箱モジ（hacomoji）は、テキストを3Dモデルで表示・出力できるオンラインジェネレーターです。STL、OBJ、PNG形式でエクスポートでき、3Dプリント用データの作成も簡単です。">
+    <meta name="keywords" content="箱モジ,hacomoji,3Dテキスト,3Dモデル,テキストジェネレーター,3Dプリント,STL,OBJ,日本語3D">
+    
+    <!-- カノニカルタグ -->
+    <link rel="canonical" href="https://hacomoji.com/">
+    
+    <!-- OGP設定 -->
+    <meta property="og:title" content="箱モジ（hacomoji） - 3Dテキストジェネレーター">
+    <meta property="og:description" content="テキストを3Dモデルで表示・出力できるオンラインジェネレーター。STL、OBJ、PNG形式でエクスポート可能。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://hacomoji.com/">
+    <meta property="og:image" content="https://hacomoji.com/hacomoji-title.png">
+    <meta property="og:site_name" content="箱モジ（hacomoji）">
+    <meta property="og:locale" content="ja_JP">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="箱モジ（hacomoji） - 3Dテキストジェネレーター">
+    <meta name="twitter:description" content="テキストを3Dモデルで表示・出力できるオンラインジェネレーター。">
+    <meta name="twitter:image" content="https://hacomoji.com/hacomoji-title.png">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- 構造化データ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "箱モジ（hacomoji）",
+      "description": "テキストを3Dモデルで表示・出力できるオンラインジェネレーター",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY"
+      },
+      "featureList": "テキストの3D表示、STL/OBJ/PNG形式でのエクスポート、パラメーター調整",
+      "screenshot": "https://hacomoji.com/hacomoji-title.png",
+      "author": {
+        "@type": "Organization",
+        "name": "株式会社wapon",
+        "url": "https://wapon.co.jp"
+      }
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><img src="hacomoji-title.png" alt="箱モジ hacomoji" width="350px"></h1>
+            <p>テキストを3Dモデルで表示・出力（ただし中に空間のある日本語は埋まります...）</p>
+        </header>
+        
+        <div class="input-section">
+            <input type="text" id="text-input" value="箱モジ" placeholder="テキストを入力">
+            <button id="generate-btn">生成</button>
+        </div>
+        
+        <div class="view-container">
+            <div id="three-d-view"></div>
+            
+            <div class="controls">
+                <!-- パラメーターセクション -->
+                <div class="collapsible-section">
+                    <div class="section-header open" data-section="parameters">
+                        <h3>パラメーター</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content" id="parameters-content">
+                        <div class="control-item">
+                            <label for="font-size">サイズ:</label>
+                            <input type="range" id="font-size" min="1" max="30" value="10">
+                            <span class="value-display">10</span>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="depth">厚み:</label>
+                            <input type="range" id="depth" min="1" max="20" value="5">
+                            <span class="value-display">5</span>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="bevel-enabled">ベベル:</label>
+                            <input type="checkbox" id="bevel-enabled" checked>
+                        </div>
+                        
+                        <div class="control-item bevel-control">
+                            <label for="bevel-thickness">ベベル厚さ:</label>
+                            <input type="range" id="bevel-thickness" min="0.1" max="2" step="0.1" value="0.5">
+                            <span class="value-display">0.5</span>
+                        </div>
+                        
+                        <div class="control-item bevel-control">
+                            <label for="bevel-size">ベベルサイズ:</label>
+                            <input type="range" id="bevel-size" min="0.1" max="2" step="0.1" value="0.3">
+                            <span class="value-display">0.3</span>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="curve-segments">カーブ解像度:</label>
+                            <input type="range" id="curve-segments" min="1" max="24" step="1" value="12">
+                            <span class="value-display">12</span>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="letter-spacing">文字の間隔:</label>
+                            <input type="range" id="letter-spacing" min="0" max="1" step="0.05" value="0.2">
+                            <span class="value-display">0.2</span>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="font-type">フォント:</label>
+                            <select id="font-type">
+                                <option value="helvetiker">Helvetiker</option>
+                                <option value="optimer">Optimer</option>
+                                <option value="gentilis">Gentilis</option>
+                                <option value="droid">Droid Sans</option>
+                                <option value="japanese" selected>日本語</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="material-type">マテリアル:</label>
+                            <select id="material-type">
+                                <option value="normal">標準</option>
+                                <option value="phong">フォン</option>
+                                <option value="lambert">ランバート</option>
+                                <option value="wireframe">ワイヤーフレーム</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="color">色:</label>
+                            <input type="color" id="color" value="#1976D2">
+                        </div>
+                        
+                        <div class="control-item material-control">
+                            <label for="roughness">質感(粗さ):</label>
+                            <input type="range" id="roughness" min="0" max="1" step="0.05" value="0.4">
+                            <span class="value-display">0.4</span>
+                        </div>
+                        
+                        <div class="control-item material-control">
+                            <label for="metalness">反射率:</label>
+                            <input type="range" id="metalness" min="0" max="1" step="0.05" value="0.3">
+                            <span class="value-display">0.3</span>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="opacity">透明度:</label>
+                            <input type="range" id="opacity" min="0.1" max="1" step="0.05" value="1">
+                            <span class="value-display">1</span>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="grid-enabled">グリッド:</label>
+                            <input type="checkbox" id="grid-enabled" checked>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- テクスチャセクション -->
+                <div class="collapsible-section">
+                    <div class="section-header" data-section="textures">
+                        <h3>テクスチャ</h3>
+                        <span class="toggle-icon">▶</span>
+                    </div>
+                    <div class="section-content" id="textures-content" style="display: none;">
+                        <div class="control-item">
+                            <label for="texture-enabled">テクスチャ:</label>
+                            <input type="checkbox" id="texture-enabled">
+                        </div>
+                        
+                        <div class="control-item texture-control">
+                            <label for="texture-select">種類:</label>
+                            <select id="texture-select">
+                                <option value="brick">レンガ</option>
+                                <option value="wood">木目</option>
+                                <option value="concrete">コンクリート</option>
+                                <option value="fabric">ファブリック</option>
+                                <option value="custom">カスタム</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-item texture-control" id="custom-texture-container">
+                            <label for="custom-texture">画像:</label>
+                            <input type="file" id="custom-texture" accept="image/*">
+                            <small class="texture-info">対応形式: JPG, PNG, GIF, WebP, SVG など</small>
+                        </div>
+                        
+                        <div class="control-item texture-control">
+                            <label for="texture-scale">スケール:</label>
+                            <input type="range" id="texture-scale" min="0.1" max="5" step="0.1" value="1">
+                            <span class="value-display">1</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 光源セクション -->
+                <div class="collapsible-section">
+                    <div class="section-header" data-section="lights">
+                        <h3>光源</h3>
+                        <span class="toggle-icon">▶</span>
+                    </div>
+                    <div class="section-content" id="lights-content" style="display: none;">
+                        
+                        <div class="control-item">
+                            <label for="main-light-enabled">メイン光源:</label>
+                            <input type="checkbox" id="main-light-enabled" checked>
+                        </div>
+                        
+                        <div class="control-item light-control main-light-control">
+                            <label for="main-light-intensity">明るさ:</label>
+                            <input type="range" id="main-light-intensity" min="0" max="2" step="0.1" value="0.8">
+                            <span class="value-display">0.8</span>
+                        </div>
+                        
+                        <div class="control-item light-control main-light-control">
+                            <label for="main-light-color">色:</label>
+                            <input type="color" id="main-light-color" value="#ffffff">
+                        </div>
+                        
+                        <div class="control-item light-control main-light-control">
+                            <label for="main-light-x">X位置:</label>
+                            <input type="range" id="main-light-x" min="-50" max="50" step="1" value="10">
+                            <span class="value-display">10</span>
+                        </div>
+                        
+                        <div class="control-item light-control main-light-control">
+                            <label for="main-light-y">Y位置:</label>
+                            <input type="range" id="main-light-y" min="-50" max="50" step="1" value="10">
+                            <span class="value-display">10</span>
+                        </div>
+                        
+                        <div class="control-item light-control main-light-control">
+                            <label for="main-light-z">Z位置:</label>
+                            <input type="range" id="main-light-z" min="-50" max="50" step="1" value="10">
+                            <span class="value-display">10</span>
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="ambient-light-enabled">環境光:</label>
+                            <input type="checkbox" id="ambient-light-enabled" checked>
+                        </div>
+                        
+                        <div class="control-item light-control ambient-light-control">
+                            <label for="ambient-light-intensity">明るさ:</label>
+                            <input type="range" id="ambient-light-intensity" min="0" max="1" step="0.05" value="0.5">
+                            <span class="value-display">0.5</span>
+                        </div>
+                        
+                        <div class="control-item light-control ambient-light-control">
+                            <label for="ambient-light-color">色:</label>
+                            <input type="color" id="ambient-light-color" value="#ffffff">
+                        </div>
+                        
+                        <div class="control-item">
+                            <label for="sub-light-enabled">サブ光源:</label>
+                            <input type="checkbox" id="sub-light-enabled" checked>
+                        </div>
+                        
+                        <div class="control-item light-control sub-light-control">
+                            <label for="sub-light-intensity">明るさ:</label>
+                            <input type="range" id="sub-light-intensity" min="0" max="1" step="0.05" value="0.3">
+                            <span class="value-display">0.3</span>
+                        </div>
+                        
+                        <div class="control-item light-control sub-light-control">
+                            <label for="sub-light-color">色:</label>
+                            <input type="color" id="sub-light-color" value="#ffffff">
+                        </div>
+                        
+                        <div class="control-item light-control sub-light-control">
+                            <label for="sub-light-x">X位置:</label>
+                            <input type="range" id="sub-light-x" min="-50" max="50" step="1" value="-10">
+                            <span class="value-display">-10</span>
+                        </div>
+                        
+                        <div class="control-item light-control sub-light-control">
+                            <label for="sub-light-y">Y位置:</label>
+                            <input type="range" id="sub-light-y" min="-50" max="50" step="1" value="5">
+                            <span class="value-display">5</span>
+                        </div>
+                        
+                        <div class="control-item light-control sub-light-control">
+                            <label for="sub-light-z">Z位置:</label>
+                            <input type="range" id="sub-light-z" min="-50" max="50" step="1" value="-10">
+                            <span class="value-display">-10</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="export-group">
+                    <h3>エクスポート</h3>
+                    <button id="export-stl">STLで保存</button>
+                    <button id="export-obj">OBJで保存</button>
+                    <div class="control-item">
+                        <label for="png-resolution">PNG解像度:</label>
+                        <select id="png-resolution">
+                            <option value="1">標準 (1x)</option>
+                            <option value="2" selected>高解像度 (2x)</option>
+                            <option value="4">超高解像度 (4x)</option>
+                        </select>
+                    </div>
+                    <button id="export-png">透過PNGで保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Three.js ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/FontLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/geometries/TextGeometry.js"></script>
+    
+    <!-- フォント処理ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+    
+    <!-- エクスポート用ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/STLExporter.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/OBJExporter.js"></script>
+    
+    <!-- メインスクリプト -->
+    <script src="script.js"></script>
+    
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 箱モジ（hacomoji） - <a href="https://wapon.co.jp" target="_blank" rel="noopener">株式会社wapon</a></p>
+        </div>
+    </footer>
+</body>
+</html>
