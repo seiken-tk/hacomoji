@@ -36,8 +36,6 @@ const params = {
     verticalScale: 1.0,
     frontTaper: 0.0,
     backTaper: 0.0,
-    topScale: 1.0,
-    bottomScale: 1.0,
 
     // 光源の設定
     ambientLightEnabled: true,
@@ -92,8 +90,6 @@ const horizontalScaleSlider = document.getElementById('horizontal-scale');
 const verticalScaleSlider = document.getElementById('vertical-scale');
 const frontTaperSlider = document.getElementById('front-taper');
 const backTaperSlider = document.getElementById('back-taper');
-const topScaleSlider = document.getElementById('top-scale');
-const bottomScaleSlider = document.getElementById('bottom-scale');
 
 // 環境光のコントロール
 const ambientLightEnabledCheckbox = document.getElementById('ambient-light-enabled');
@@ -185,15 +181,11 @@ horizontalScaleSlider.addEventListener('input', updateValueDisplay);
 verticalScaleSlider.addEventListener('input', updateValueDisplay);
 frontTaperSlider.addEventListener('input', updateValueDisplay);
 backTaperSlider.addEventListener('input', updateValueDisplay);
-topScaleSlider.addEventListener('input', updateValueDisplay);
-bottomScaleSlider.addEventListener('input', updateValueDisplay);
 
 horizontalScaleSlider.addEventListener('change', updateTransform);
 verticalScaleSlider.addEventListener('change', updateTransform);
 frontTaperSlider.addEventListener('change', updateTransform);
 backTaperSlider.addEventListener('change', updateTransform);
-topScaleSlider.addEventListener('change', updateTransform);
-bottomScaleSlider.addEventListener('change', updateTransform);
 
 // グリッドの表示/非表示
 gridEnabledCheckbox.addEventListener('change', toggleGrid);
@@ -911,8 +903,6 @@ function updateAllValueDisplays() {
     verticalScaleSlider.nextElementSibling.textContent = verticalScaleSlider.value;
     frontTaperSlider.nextElementSibling.textContent = frontTaperSlider.value;
     backTaperSlider.nextElementSibling.textContent = backTaperSlider.value;
-    topScaleSlider.nextElementSibling.textContent = topScaleSlider.value;
-    bottomScaleSlider.nextElementSibling.textContent = bottomScaleSlider.value;
     
     // 環境光の設定
     ambientLightIntensitySlider.nextElementSibling.textContent = ambientLightIntensitySlider.value;
@@ -985,24 +975,18 @@ function toggleTransformControls() {
         params.verticalScale = 1.0;
         params.frontTaper = 0.0;
         params.backTaper = 0.0;
-        params.topScale = 1.0;
-        params.bottomScale = 1.0;
         
         // スライダーの値を更新
         horizontalScaleSlider.value = 1.0;
         verticalScaleSlider.value = 1.0;
         frontTaperSlider.value = 0.0;
         backTaperSlider.value = 0.0;
-        topScaleSlider.value = 1.0;
-        bottomScaleSlider.value = 1.0;
         
         // 値表示を更新
         horizontalScaleSlider.nextElementSibling.textContent = 1.0;
         verticalScaleSlider.nextElementSibling.textContent = 1.0;
         frontTaperSlider.nextElementSibling.textContent = 0.0;
         backTaperSlider.nextElementSibling.textContent = 0.0;
-        topScaleSlider.nextElementSibling.textContent = 1.0;
-        bottomScaleSlider.nextElementSibling.textContent = 1.0;
         
         createText();
     }
@@ -1015,8 +999,6 @@ function updateTransform() {
     params.verticalScale = parseFloat(verticalScaleSlider.value);
     params.frontTaper = parseFloat(frontTaperSlider.value);
     params.backTaper = parseFloat(backTaperSlider.value);
-    params.topScale = parseFloat(topScaleSlider.value);
-    params.bottomScale = parseFloat(bottomScaleSlider.value);
     
     createText();
 }
@@ -1235,7 +1217,6 @@ function updateLightShadowValueDisplays() {
     subLightYSlider.nextElementSibling.textContent = subLightYSlider.value;
     subLightZSlider.nextElementSibling.textContent = subLightZSlider.value;
 }
-
 // ジオメトリに変形を適用する
 function applyTransformToGeometry(geometry) {
     // ジオメトリの頂点を取得
@@ -1246,8 +1227,16 @@ function applyTransformToGeometry(geometry) {
     const verticalScale = params.verticalScale;
     const frontTaper = params.frontTaper;
     const backTaper = params.backTaper;
-    const topScale = params.topScale;
-    const bottomScale = params.bottomScale;
+    
+    // ジオメトリのバウンディングボックスを計算して、モデルの範囲を把握
+    geometry.computeBoundingBox();
+    const bbox = geometry.boundingBox;
+    
+    // モデルの中心と寸法を計算
+    const centerX = (bbox.max.x + bbox.min.x) / 2;
+    const centerY = (bbox.max.y + bbox.min.y) / 2;
+    const centerZ = (bbox.max.z + bbox.min.z) / 2;
+    const sizeZ = bbox.max.z - bbox.min.z;
     
     // 各頂点に変形を適用
     for (let i = 0; i < position.count; i++) {
@@ -1256,28 +1245,23 @@ function applyTransformToGeometry(geometry) {
         const y = position.getY(i);
         const z = position.getZ(i);
         
-        // 横方向のスケール
+        // 基本的なスケーリング
         let newX = x * horizontalScale;
-        
-        // 縦方向のスケール
         let newY = y * verticalScale;
         
-        // 前方/後方のすぼみ（Z座標に基づいて横幅を調整）
-        if (z > 0) {
-            // 前方（Z > 0）
-            newX *= (1.0 - frontTaper * (z / params.depth));
-        } else if (z < 0) {
-            // 後方（Z < 0）
-            newX *= (1.0 - backTaper * (-z / params.depth));
-        }
+        // 前方/後方のすぼみ計算のための相対Z位置（0～1の範囲）
+        // 前方: z > centerZ、後方: z < centerZ
+        const relativeZ = (z - centerZ) / (sizeZ / 2);
         
-        // 上部/下部の拡大（Y座標に基づいて横幅を調整）
-        if (y > 0) {
-            // 上部（Y > 0）
-            newX *= topScale;
-        } else if (y < 0) {
-            // 下部（Y < 0）
-            newX *= bottomScale;
+        // 前方すぼみ（モデルの前方部分）
+        if (relativeZ > 0) {
+            const taperFactor = frontTaper * relativeZ;
+            newX *= (1.0 - taperFactor);
+        }
+        // 後方すぼみ（モデルの後方部分）
+        else if (relativeZ < 0) {
+            const taperFactor = backTaper * Math.abs(relativeZ);
+            newX *= (1.0 - taperFactor);
         }
         
         // 変形した座標を設定
@@ -1291,7 +1275,6 @@ function applyTransformToGeometry(geometry) {
     // 法線を再計算
     geometry.computeVertexNormals();
 }
-
 // カスタムテクスチャの処理
 function handleCustomTexture(event) {
     const file = event.target.files[0];
