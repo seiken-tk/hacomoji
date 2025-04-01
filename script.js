@@ -29,6 +29,15 @@ const params = {
     textureType: 'brick',
     textureScale: 1.0,
     customTexture: null,
+    
+    // 文字変形の設定
+    transformEnabled: false,
+    horizontalScale: 1.0,
+    verticalScale: 1.0,
+    frontTaper: 0.0,
+    backTaper: 0.0,
+    topScale: 1.0,
+    bottomScale: 1.0,
 
     // 光源の設定
     ambientLightEnabled: true,
@@ -76,6 +85,15 @@ const exportSTLBtn = document.getElementById('export-stl');
 const exportOBJBtn = document.getElementById('export-obj');
 const exportPNGBtn = document.getElementById('export-png');
 const pngResolutionSelect = document.getElementById('png-resolution');
+
+// 文字変形のDOM要素
+const transformEnabledCheckbox = document.getElementById('transform-enabled');
+const horizontalScaleSlider = document.getElementById('horizontal-scale');
+const verticalScaleSlider = document.getElementById('vertical-scale');
+const frontTaperSlider = document.getElementById('front-taper');
+const backTaperSlider = document.getElementById('back-taper');
+const topScaleSlider = document.getElementById('top-scale');
+const bottomScaleSlider = document.getElementById('bottom-scale');
 
 // 環境光のコントロール
 const ambientLightEnabledCheckbox = document.getElementById('ambient-light-enabled');
@@ -159,6 +177,24 @@ bevelEnabledCheckbox.addEventListener('change', toggleBevelControls);
 // マテリアルコントロールの表示/非表示
 materialTypeSelect.addEventListener('change', toggleMaterialControls);
 
+// 文字変形コントロールの表示/非表示
+transformEnabledCheckbox.addEventListener('change', toggleTransformControls);
+
+// 文字変形パラメーターのイベントリスナー
+horizontalScaleSlider.addEventListener('input', updateValueDisplay);
+verticalScaleSlider.addEventListener('input', updateValueDisplay);
+frontTaperSlider.addEventListener('input', updateValueDisplay);
+backTaperSlider.addEventListener('input', updateValueDisplay);
+topScaleSlider.addEventListener('input', updateValueDisplay);
+bottomScaleSlider.addEventListener('input', updateValueDisplay);
+
+horizontalScaleSlider.addEventListener('change', updateTransform);
+verticalScaleSlider.addEventListener('change', updateTransform);
+frontTaperSlider.addEventListener('change', updateTransform);
+backTaperSlider.addEventListener('change', updateTransform);
+topScaleSlider.addEventListener('change', updateTransform);
+bottomScaleSlider.addEventListener('change', updateTransform);
+
 // グリッドの表示/非表示
 gridEnabledCheckbox.addEventListener('change', toggleGrid);
 
@@ -214,6 +250,13 @@ function init() {
     
     // テクスチャコントロールの初期表示
     toggleTextureControls();
+    
+    // 文字変形を有効にする（チェックボックスをオンにする）
+    transformEnabledCheckbox.checked = true;
+    params.transformEnabled = true;
+    
+    // 文字変形コントロールの初期表示
+    toggleTransformControls();
     
     // 光源コントロールの初期表示
     toggleLightControls();
@@ -513,6 +556,11 @@ function createText() {
     const textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
     textGeometry.translate(-textWidth / 2, -textHeight / 2, 0);
     
+    // 変形が有効な場合、ジオメトリを変形
+    if (params.transformEnabled) {
+        applyTransformToGeometry(textGeometry);
+    }
+    
     // マテリアルの作成
     const material = createMaterial();
     
@@ -607,6 +655,11 @@ function createJapaneseText() {
                 // 各シェイプを押し出して3Dジオメトリを作成
                 shapes.forEach(shape => {
                     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+                    
+                    // 変形が有効な場合、ジオメトリを変形
+                    if (params.transformEnabled) {
+                        applyTransformToGeometry(geometry);
+                    }
                     
                     // メッシュの作成
                     const charMesh = new THREE.Mesh(geometry, material);
@@ -853,6 +906,14 @@ function updateAllValueDisplays() {
     opacitySlider.nextElementSibling.textContent = opacitySlider.value;
     textureScaleSlider.nextElementSibling.textContent = textureScaleSlider.value;
     
+    // 文字変形の設定
+    horizontalScaleSlider.nextElementSibling.textContent = horizontalScaleSlider.value;
+    verticalScaleSlider.nextElementSibling.textContent = verticalScaleSlider.value;
+    frontTaperSlider.nextElementSibling.textContent = frontTaperSlider.value;
+    backTaperSlider.nextElementSibling.textContent = backTaperSlider.value;
+    topScaleSlider.nextElementSibling.textContent = topScaleSlider.value;
+    bottomScaleSlider.nextElementSibling.textContent = bottomScaleSlider.value;
+    
     // 環境光の設定
     ambientLightIntensitySlider.nextElementSibling.textContent = ambientLightIntensitySlider.value;
     
@@ -900,6 +961,64 @@ function toggleTextureControls() {
         params.textureEnabled = false;
         createText();
     }
+}
+
+// 文字変形コントロールの表示/非表示
+function toggleTransformControls() {
+    // チェックボックスの状態を取得
+    params.transformEnabled = transformEnabledCheckbox.checked;
+    
+    // 文字変形コントロールの表示/非表示を切り替え
+    const transformControls = document.querySelectorAll('.transform-control');
+    const display = params.transformEnabled ? 'flex' : 'none';
+    
+    transformControls.forEach(control => {
+        control.style.display = display;
+    });
+    
+    // 変形が有効な場合、変形パラメーターを更新
+    if (params.transformEnabled) {
+        updateTransform();
+    } else {
+        // 変形を無効にした場合、デフォルト値に戻す
+        params.horizontalScale = 1.0;
+        params.verticalScale = 1.0;
+        params.frontTaper = 0.0;
+        params.backTaper = 0.0;
+        params.topScale = 1.0;
+        params.bottomScale = 1.0;
+        
+        // スライダーの値を更新
+        horizontalScaleSlider.value = 1.0;
+        verticalScaleSlider.value = 1.0;
+        frontTaperSlider.value = 0.0;
+        backTaperSlider.value = 0.0;
+        topScaleSlider.value = 1.0;
+        bottomScaleSlider.value = 1.0;
+        
+        // 値表示を更新
+        horizontalScaleSlider.nextElementSibling.textContent = 1.0;
+        verticalScaleSlider.nextElementSibling.textContent = 1.0;
+        frontTaperSlider.nextElementSibling.textContent = 0.0;
+        backTaperSlider.nextElementSibling.textContent = 0.0;
+        topScaleSlider.nextElementSibling.textContent = 1.0;
+        bottomScaleSlider.nextElementSibling.textContent = 1.0;
+        
+        createText();
+    }
+}
+
+// 変形パラメーターの更新
+function updateTransform() {
+    params.transformEnabled = transformEnabledCheckbox.checked;
+    params.horizontalScale = parseFloat(horizontalScaleSlider.value);
+    params.verticalScale = parseFloat(verticalScaleSlider.value);
+    params.frontTaper = parseFloat(frontTaperSlider.value);
+    params.backTaper = parseFloat(backTaperSlider.value);
+    params.topScale = parseFloat(topScaleSlider.value);
+    params.bottomScale = parseFloat(bottomScaleSlider.value);
+    
+    createText();
 }
 
 // STLエクスポート
@@ -1115,6 +1234,62 @@ function updateLightShadowValueDisplays() {
     subLightXSlider.nextElementSibling.textContent = subLightXSlider.value;
     subLightYSlider.nextElementSibling.textContent = subLightYSlider.value;
     subLightZSlider.nextElementSibling.textContent = subLightZSlider.value;
+}
+
+// ジオメトリに変形を適用する
+function applyTransformToGeometry(geometry) {
+    // ジオメトリの頂点を取得
+    const position = geometry.attributes.position;
+    
+    // 変形パラメーター
+    const horizontalScale = params.horizontalScale;
+    const verticalScale = params.verticalScale;
+    const frontTaper = params.frontTaper;
+    const backTaper = params.backTaper;
+    const topScale = params.topScale;
+    const bottomScale = params.bottomScale;
+    
+    // 各頂点に変形を適用
+    for (let i = 0; i < position.count; i++) {
+        // 頂点の座標を取得
+        const x = position.getX(i);
+        const y = position.getY(i);
+        const z = position.getZ(i);
+        
+        // 横方向のスケール
+        let newX = x * horizontalScale;
+        
+        // 縦方向のスケール
+        let newY = y * verticalScale;
+        
+        // 前方/後方のすぼみ（Z座標に基づいて横幅を調整）
+        if (z > 0) {
+            // 前方（Z > 0）
+            newX *= (1.0 - frontTaper * (z / params.depth));
+        } else if (z < 0) {
+            // 後方（Z < 0）
+            newX *= (1.0 - backTaper * (-z / params.depth));
+        }
+        
+        // 上部/下部の拡大（Y座標に基づいて横幅を調整）
+        if (y > 0) {
+            // 上部（Y > 0）
+            newX *= topScale;
+        } else if (y < 0) {
+            // 下部（Y < 0）
+            newX *= bottomScale;
+        }
+        
+        // 変形した座標を設定
+        position.setX(i, newX);
+        position.setY(i, newY);
+    }
+    
+    // ジオメトリを更新
+    position.needsUpdate = true;
+    
+    // 法線を再計算
+    geometry.computeVertexNormals();
 }
 
 // カスタムテクスチャの処理
