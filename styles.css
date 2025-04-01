@@ -296,12 +296,45 @@ header p {
 
 /* 削除：重複したスタイル定義 */
 
-.bevel-control, .material-control, .texture-control, .shadow-control, .light-control, .transform-control {
+.bevel-control, .material-control, .texture-control, .shadow-control, .light-control, .transform-control, .rotation-control, .video-control {
     padding-left: 20px;
 }
 
-.bevel-control label, .material-control label, .texture-control label, .shadow-control label, .light-control label, .transform-control label {
+.bevel-control label, .material-control label, .texture-control label, .shadow-control label, .light-control label, .transform-control label, .rotation-control label, .video-control label {
     padding-left: 10px;
+}
+
+/* 回転コントロールの初期状態 */
+.rotation-control {
+    display: none;
+}
+
+/* 動画ボタンのスタイル */
+.video-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.video-button {
+    padding: 8px 15px;
+    background-color: #1976D2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    flex: 1;
+    margin: 0 5px;
+}
+
+.video-button:hover {
+    background-color: #1565C0;
+}
+
+.video-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
 
 /* 変形コントロールの初期状態 */

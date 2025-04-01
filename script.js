@@ -8,6 +8,12 @@ let textureLoader = new THREE.TextureLoader();
 let textures = {};
 let ambientLight, mainLight, subLight;
 let lightHelpers = [];
+let animationId;
+let capturer;
+let isRecording = false;
+let rotationAngle = 0; // 回転角度を追跡する変数
+let startRotationAngle = 0; // 録画開始時の回転角度
+let fullRotationRecording = false; // 一周録画モードのフラグ
 
 // パラメーター
 const params = {
@@ -54,7 +60,17 @@ const params = {
     subLightIntensity: 0.3,
     subLightX: -10,
     subLightY: 5,
-    subLightZ: -10
+    subLightZ: -10,
+    
+    // 回転アニメーションの設定
+    rotationEnabled: false,
+    rotationAxis: 'y', // 'x', 'y', 'z'
+    rotationSpeed: 0.01,
+    
+    // 動画出力の設定
+    videoQuality: 'high', // 'low', 'medium', 'high'
+    videoFrameRate: 30,
+    videoDuration: 5 // 秒
 };
 
 // DOM要素
@@ -111,6 +127,18 @@ const subLightColorPicker = document.getElementById('sub-light-color');
 const subLightXSlider = document.getElementById('sub-light-x');
 const subLightYSlider = document.getElementById('sub-light-y');
 const subLightZSlider = document.getElementById('sub-light-z');
+
+// 回転アニメーションのコントロール
+const rotationEnabledCheckbox = document.getElementById('rotation-enabled');
+const rotationAxisSelect = document.getElementById('rotation-axis');
+const rotationSpeedSlider = document.getElementById('rotation-speed');
+
+// 動画出力のコントロール
+const videoQualitySelect = document.getElementById('video-quality');
+const videoFrameRateSelect = document.getElementById('video-frame-rate');
+const videoDurationSlider = document.getElementById('video-duration');
+const startRecordingBtn = document.getElementById('start-recording');
+const stopRecordingBtn = document.getElementById('stop-recording');
 
 // 値表示要素
 const valueDisplays = document.querySelectorAll('.value-display');
@@ -220,6 +248,20 @@ subLightYSlider.addEventListener('change', updateLights);
 subLightZSlider.addEventListener('input', updateValueDisplay);
 subLightZSlider.addEventListener('change', updateLights);
 
+// 回転アニメーションの設定
+rotationEnabledCheckbox.addEventListener('change', updateRotation);
+rotationAxisSelect.addEventListener('change', updateRotation);
+rotationSpeedSlider.addEventListener('input', updateValueDisplay);
+rotationSpeedSlider.addEventListener('change', updateRotation);
+
+// 動画出力の設定
+videoQualitySelect.addEventListener('change', updateVideoSettings);
+videoFrameRateSelect.addEventListener('change', updateVideoSettings);
+videoDurationSlider.addEventListener('input', updateValueDisplay);
+videoDurationSlider.addEventListener('change', updateVideoSettings);
+startRecordingBtn.addEventListener('click', startRecording);
+stopRecordingBtn.addEventListener('click', stopRecording);
+
 // 初期化関数
 function init() {
     // Three.jsの初期化
@@ -253,11 +295,23 @@ function init() {
     // 光源コントロールの初期表示
     toggleLightControls();
     
+    // 回転アニメーションコントロールの初期表示
+    toggleRotationControls();
+    
+    // 動画出力コントロールの初期表示
+    toggleVideoControls();
+    
     // 影と光源の値表示を更新
     updateLightShadowValueDisplays();
     
+    // 回転と動画出力の値表示を更新
+    updateRotationVideoValueDisplays();
+    
     // 折り畳みセクションの初期化
     initCollapsibleSections();
+    
+    // CCapture.jsの初期化
+    initCCapture();
 }
 
 // 折り畳みセクションの初期化
@@ -827,17 +881,51 @@ function updateTexture() {
 
 // アニメーションループ
 function animate() {
-    requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
     controls.update();
+    
+    // 回転アニメーションが有効な場合
+    if (params.rotationEnabled && textGroup) {
+        // 選択された軸に基づいて回転
+        switch (params.rotationAxis) {
+            case 'x':
+                textGroup.rotation.x += params.rotationSpeed;
+                rotationAngle += params.rotationSpeed;
+                break;
+            case 'y':
+                textGroup.rotation.y += params.rotationSpeed;
+                rotationAngle += params.rotationSpeed;
+                break;
+            case 'z':
+                textGroup.rotation.z += params.rotationSpeed;
+                rotationAngle += params.rotationSpeed;
+                break;
+        }
+        
+        // 一周録画モードが有効で、一周（2π）以上回転した場合に録画を停止
+        if (fullRotationRecording && isRecording && (rotationAngle - startRotationAngle) >= Math.PI * 2) {
+            stopRecording();
+        }
+    }
     
     // モバイルデバイスの場合、パフォーマンス最適化
     if (isMobileDevice()) {
         // 画面が表示されている場合のみレンダリング
         if (document.visibilityState === 'visible') {
             renderer.render(scene, camera);
+            
+            // 録画中の場合、フレームをキャプチャ
+            if (isRecording && capturer) {
+                capturer.capture(renderer.domElement);
+            }
         }
     } else {
         renderer.render(scene, camera);
+        
+        // 録画中の場合、フレームをキャプチャ
+        if (isRecording && capturer) {
+            capturer.capture(renderer.domElement);
+        }
     }
 }
 
@@ -1224,6 +1312,156 @@ function updateLightShadowValueDisplays() {
     subLightXSlider.nextElementSibling.textContent = subLightXSlider.value;
     subLightYSlider.nextElementSibling.textContent = subLightYSlider.value;
     subLightZSlider.nextElementSibling.textContent = subLightZSlider.value;
+}
+
+// 回転と動画出力の値表示を更新
+function updateRotationVideoValueDisplays() {
+    // 回転アニメーションの設定
+    if (rotationSpeedSlider && rotationSpeedSlider.nextElementSibling) {
+        rotationSpeedSlider.nextElementSibling.textContent = rotationSpeedSlider.value;
+    }
+    
+    // 動画出力の設定
+    if (videoDurationSlider && videoDurationSlider.nextElementSibling) {
+        videoDurationSlider.nextElementSibling.textContent = videoDurationSlider.value;
+    }
+}
+
+// 回転アニメーションコントロールの表示/非表示
+function toggleRotationControls() {
+    // チェックボックスの状態を取得
+    params.rotationEnabled = rotationEnabledCheckbox.checked;
+    
+    // 回転アニメーションコントロールの表示/非表示を切り替え
+    const rotationControls = document.querySelectorAll('.rotation-control');
+    const display = params.rotationEnabled ? 'flex' : 'none';
+    
+    rotationControls.forEach(control => {
+        control.style.display = display;
+    });
+}
+
+// 回転パラメーターの更新
+function updateRotation() {
+    params.rotationEnabled = rotationEnabledCheckbox.checked;
+    params.rotationAxis = rotationAxisSelect.value;
+    params.rotationSpeed = parseFloat(rotationSpeedSlider.value);
+    
+    // 回転コントロールの表示/非表示を更新
+    toggleRotationControls();
+    
+    // 回転が無効な場合、回転をリセット
+    if (!params.rotationEnabled) {
+        textGroup.rotation.set(0, 0, 0);
+    }
+}
+
+// 動画出力コントロールの表示/非表示
+function toggleVideoControls() {
+    const videoControls = document.querySelectorAll('.video-control');
+    videoControls.forEach(control => {
+        control.style.display = 'flex';
+    });
+}
+
+// 動画出力設定の更新
+function updateVideoSettings() {
+    params.videoQuality = videoQualitySelect.value;
+    params.videoFrameRate = parseInt(videoFrameRateSelect.value);
+    params.videoDuration = parseInt(videoDurationSlider.value);
+}
+
+// CCapture.jsの初期化
+function initCCapture() {
+    // CCapture.jsのスクリプトを動的に読み込む
+    const ccaptureScript = document.createElement('script');
+    ccaptureScript.src = 'https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js';
+    document.head.appendChild(ccaptureScript);
+    
+    // WebMエンコーダーのスクリプトを動的に読み込む
+    const webmScript = document.createElement('script');
+    webmScript.src = 'https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/src/webm-writer-0.2.0.js';
+    document.head.appendChild(webmScript);
+}
+
+// 録画開始
+function startRecording() {
+    if (!isInitialized || isRecording) return;
+    
+    // 回転が有効でない場合は有効にする
+    if (!params.rotationEnabled) {
+        params.rotationEnabled = true;
+        rotationEnabledCheckbox.checked = true;
+        toggleRotationControls();
+    }
+    
+    // 録画中フラグを設定
+    isRecording = true;
+    
+    // 一周録画モードを有効にし、開始時の回転角度を記録
+    fullRotationRecording = true;
+    startRotationAngle = rotationAngle;
+    
+    // 録画品質に基づいて設定を調整
+    let quality = 0.7;
+    let frameRate = params.videoFrameRate;
+    
+    switch (params.videoQuality) {
+        case 'low':
+            quality = 0.5;
+            break;
+        case 'medium':
+            quality = 0.7;
+            break;
+        case 'high':
+            quality = 0.9;
+            break;
+    }
+    
+    // CCapturerの初期化
+    capturer = new CCapture({
+        format: 'webm',
+        framerate: frameRate,
+        quality: quality,
+        verbose: true
+    });
+    
+    // 録画開始
+    capturer.start();
+    
+    // 録画中の表示
+    startRecordingBtn.disabled = true;
+    startRecordingBtn.textContent = '録画中...';
+    stopRecordingBtn.disabled = false;
+}
+
+// 録画停止
+function stopRecording() {
+    if (!isRecording) return;
+    
+    // 録画停止
+    isRecording = false;
+    fullRotationRecording = false; // 一周録画モードをリセット
+    capturer.stop();
+    
+    // 録画完了のアラートを表示
+    alert('録画が完了しました。動画ファイルをダウンロードします。');
+    
+    // 録画データの保存
+    capturer.save(blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${params.text}_rotation.webm`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+    });
+    
+    // ボタンの状態を戻す
+    startRecordingBtn.disabled = false;
+    startRecordingBtn.textContent = '録画開始';
+    stopRecordingBtn.disabled = true;
 }
 // ジオメトリに変形を適用する
 function applyTransformToGeometry(geometry) {
