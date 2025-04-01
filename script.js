@@ -352,9 +352,13 @@ function initThreeJS() {
     
     // グリッドヘルパーの追加
     gridHelper = new THREE.GridHelper(100, 10);
+    // グリッドヘルパーを背面に表示するために低いrenderOrderを設定
+    gridHelper.renderOrder = -1;
     scene.add(gridHelper);
     
     // テキストグループをシーンに追加
+    // テキストを前面に表示するために高いrenderOrderを設定
+    textGroup.renderOrder = 1;
     scene.add(textGroup);
     
     // アニメーションループの開始
@@ -558,6 +562,8 @@ function createText() {
     
     // メッシュの作成
     textMesh = new THREE.Mesh(textGeometry, material);
+    // テキストメッシュを前面に表示するためにrenderOrderを設定
+    textMesh.renderOrder = 2;
     
     textGroup.add(textMesh);
     
@@ -660,6 +666,8 @@ function createJapaneseText() {
                     charMesh.position.x = xPos;
                     // Y軸を反転（OpenTypeとThree.jsの座標系の違いを調整）
                     charMesh.rotation.x = Math.PI;
+                    // 文字メッシュを前面に表示するためにrenderOrderを設定
+                    charMesh.renderOrder = 2;
                     
                     // 影の設定は削除
                     
