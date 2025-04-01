@@ -29,7 +29,7 @@ const params = {
     textureType: 'brick',
     textureScale: 1.0,
     customTexture: null,
-    // 影の設定は削除
+
     // 光源の設定
     ambientLightEnabled: true,
     ambientLightColor: '#ffffff',
@@ -76,8 +76,6 @@ const exportSTLBtn = document.getElementById('export-stl');
 const exportOBJBtn = document.getElementById('export-obj');
 const exportPNGBtn = document.getElementById('export-png');
 const pngResolutionSelect = document.getElementById('png-resolution');
-
-// 影のコントロールは削除
 
 // 環境光のコントロール
 const ambientLightEnabledCheckbox = document.getElementById('ambient-light-enabled');
@@ -164,8 +162,6 @@ materialTypeSelect.addEventListener('change', toggleMaterialControls);
 // グリッドの表示/非表示
 gridEnabledCheckbox.addEventListener('change', toggleGrid);
 
-// 影の設定に関するイベントリスナーは削除
-
 // 環境光の設定
 ambientLightEnabledCheckbox.addEventListener('change', updateLights);
 ambientLightIntensitySlider.addEventListener('input', updateValueDisplay);
@@ -218,8 +214,6 @@ function init() {
     
     // テクスチャコントロールの初期表示
     toggleTextureControls();
-    
-    // 影コントロールの初期表示は削除
     
     // 光源コントロールの初期表示
     toggleLightControls();
@@ -446,8 +440,6 @@ function addLights() {
     // テキストグループに影を受ける設定は削除
     textGroup.receiveShadow = false;
     textGroup.castShadow = false;
-    
-    // 影と地面の機能は削除
 }
 
 // フォントのロード
@@ -526,8 +518,6 @@ function createText() {
     
     // メッシュの作成
     textMesh = new THREE.Mesh(textGeometry, material);
-    
-    // 影の設定は削除
     
     textGroup.add(textMesh);
     
@@ -757,8 +747,6 @@ function createMaterial() {
         }
     }
     
-    // 影の設定は削除
-    
     return material;
 }
 
@@ -864,8 +852,6 @@ function updateAllValueDisplays() {
     metalnessSlider.nextElementSibling.textContent = metalnessSlider.value;
     opacitySlider.nextElementSibling.textContent = opacitySlider.value;
     textureScaleSlider.nextElementSibling.textContent = textureScaleSlider.value;
-    
-    // 影の設定は削除
     
     // 環境光の設定
     ambientLightIntensitySlider.nextElementSibling.textContent = ambientLightIntensitySlider.value;
@@ -1072,8 +1058,6 @@ function toggleLightControls() {
     });
 }
 
-// 影の設定を更新する関数は削除
-
 // 光源の設定を更新
 function updateLights() {
     // 環境光の設定
@@ -1117,8 +1101,6 @@ function updateLights() {
 
 // 影と光源の値表示を更新
 function updateLightShadowValueDisplays() {
-    // 影の設定は削除
-    
     // 環境光の設定
     ambientLightIntensitySlider.nextElementSibling.textContent = ambientLightIntensitySlider.value;
     
