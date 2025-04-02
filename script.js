@@ -295,11 +295,8 @@ function init() {
     // 光源コントロールの初期表示
     toggleLightControls();
     
-    // 回転アニメーションコントロールの初期表示
+    // 回転アニメーションコントロールの初期表示（動画出力コントロールも含む）
     toggleRotationControls();
-    
-    // 動画出力コントロールの初期表示
-    toggleVideoControls();
     
     // 影と光源の値表示を更新
     updateLightShadowValueDisplays();
@@ -1339,6 +1336,18 @@ function toggleRotationControls() {
     rotationControls.forEach(control => {
         control.style.display = display;
     });
+    
+    // 動画出力コントロールも回転アニメーションの状態に連動させる
+    const videoControls = document.querySelectorAll('.video-control');
+    videoControls.forEach(control => {
+        control.style.display = display;
+    });
+    
+    // 録画ボタンの表示/非表示
+    const videoButtons = document.querySelector('.video-buttons');
+    if (videoButtons) {
+        videoButtons.style.display = params.rotationEnabled ? 'flex' : 'none';
+    }
 }
 
 // 回転パラメーターの更新
@@ -1356,13 +1365,7 @@ function updateRotation() {
     }
 }
 
-// 動画出力コントロールの表示/非表示
-function toggleVideoControls() {
-    const videoControls = document.querySelectorAll('.video-control');
-    videoControls.forEach(control => {
-        control.style.display = 'flex';
-    });
-}
+// 動画出力コントロールの表示/非表示関数は削除し、回転コントロールに統合
 
 // 動画出力設定の更新
 function updateVideoSettings() {
@@ -1393,6 +1396,9 @@ function startRecording() {
         params.rotationEnabled = true;
         rotationEnabledCheckbox.checked = true;
         toggleRotationControls();
+        
+        // 回転が有効になったことをユーザーに通知
+        alert('録画のため回転が有効になりました');
     }
     
     // 録画中フラグを設定

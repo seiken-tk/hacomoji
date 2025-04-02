@@ -417,6 +417,20 @@ header p {
     background-color: #7B1FA2;
 }
 
+/* セクション区切り線とサブタイトル */
+.section-divider {
+    margin: 15px 0;
+    border: 0;
+    border-top: 1px solid #ddd;
+}
+
+.section-content h4 {
+    margin: 10px 0;
+    color: #555;
+    font-size: 14px;
+    font-weight: 600;
+}
+
 /* フッタースタイル */
 .footer {
     margin-top: 50px;
