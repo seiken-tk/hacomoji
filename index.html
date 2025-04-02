@@ -30,7 +30,11 @@
     <meta name="twitter:image" content="https://hacomoji.com/hacomoji-title.png">
     
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts - 英字フォント -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Google Fonts - 日本語フォント -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=M+PLUS+1p:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&family=Kosugi+Maru&family=Sawarabi+Gothic&family=Sawarabi+Mincho&family=Kosugi&display=swap" rel="stylesheet">
     
     <!-- 構造化データ -->
     <script type="application/ld+json">
@@ -154,11 +158,25 @@
                         <div class="control-item">
                             <label for="font-type">フォント:</label>
                             <select id="font-type">
-                                <option value="helvetiker">Helvetiker</option>
-                                <option value="optimer">Optimer</option>
-                                <option value="gentilis">Gentilis</option>
-                                <option value="droid">Droid Sans</option>
-                                <option value="japanese" selected>日本語</option>
+                                <optgroup label="英字フォント">
+                                    <option value="helvetiker">Helvetiker</option>
+                                    <option value="optimer">Optimer</option>
+                                    <option value="gentilis">Gentilis</option>
+                                    <option value="droid">Droid Sans</option>
+                                    <option value="roboto">Roboto</option>
+                                    <option value="open-sans">Open Sans</option>
+=======
+                                </optgroup>
+                                <optgroup label="日本語フォント">
+                                    <option value="noto-sans-jp" selected>Noto Sans JP</option>
+                                    <option value="noto-serif-jp">Noto Serif JP</option>
+                                    <option value="mplus-1p">M PLUS 1p</option>
+                                    <option value="mplus-rounded-1c">M PLUS Rounded 1c</option>
+                                    <option value="kosugi-maru">Kosugi Maru</option>
+                                    <option value="sawarabi-gothic">Sawarabi Gothic</option>
+                                    <option value="sawarabi-mincho">Sawarabi Mincho</option>
+                                    <option value="kosugi">Kosugi</option>
+                                </optgroup>
                             </select>
                         </div>
                         

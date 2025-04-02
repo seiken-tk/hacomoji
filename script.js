@@ -25,7 +25,7 @@ const params = {
     bevelSize: 0.3,
     curveSegments: 12,
     letterSpacing: 0.2,
-    fontType: 'japanese',
+    fontType: 'noto-sans-jp',
     materialType: 'normal',
     color: '#1976D2',
     roughness: 0.4,
@@ -538,7 +538,19 @@ function loadFont() {
     
     let fontPath;
     
-    // フォントタイプに基づいてパスを設定
+    // 日本語フォントの場合
+    if (params.fontType.startsWith('noto-sans-jp') ||
+        params.fontType.startsWith('noto-serif-jp') ||
+        params.fontType.startsWith('mplus') ||
+        params.fontType.startsWith('kosugi') ||
+        params.fontType.startsWith('sawarabi')) {
+        // 日本語フォントの場合は特別な処理
+        font = null; // フォントオブジェクトはnullに設定
+        createText(); // 直接テキスト作成へ
+        return;
+    }
+    
+    // 英字フォントの場合
     switch (params.fontType) {
         case 'optimer':
             fontPath = 'https://cdn.jsdelivr.net/npm/three@0.132.2/examples/fonts/optimer_regular.typeface.json';
@@ -549,11 +561,12 @@ function loadFont() {
         case 'droid':
             fontPath = 'https://cdn.jsdelivr.net/npm/three@0.132.2/examples/fonts/droid/droid_sans_regular.typeface.json';
             break;
-        case 'japanese':
-            // 日本語の場合は特別な処理
-            font = null; // フォントオブジェクトはnullに設定
-            createText(); // 直接テキスト作成へ
-            return;
+        case 'roboto':
+        case 'open-sans':
+            // Google Fontsの英字フォントはThree.jsのフォントローダーでは直接サポートされていないため、
+            // デフォルトのhelvetikerを使用
+            fontPath = 'https://cdn.jsdelivr.net/npm/three@0.132.2/examples/fonts/helvetiker_regular.typeface.json';
+            break;
         default: // helvetiker
             fontPath = 'https://cdn.jsdelivr.net/npm/three@0.132.2/examples/fonts/helvetiker_regular.typeface.json';
     }
@@ -577,7 +590,11 @@ function createText() {
     textGroup.clear();
     
     // 日本語フォントの場合
-    if (params.fontType === 'japanese') {
+    if (params.fontType.startsWith('noto-sans-jp') ||
+        params.fontType.startsWith('noto-serif-jp') ||
+        params.fontType.startsWith('mplus') ||
+        params.fontType.startsWith('kosugi') ||
+        params.fontType.startsWith('sawarabi')) {
         createJapaneseText();
         return;
     }
@@ -628,22 +645,142 @@ function createJapaneseText() {
     console.log('日本語テキスト作成:', text);
     if (!text) return;
     
-    // ローディングメッセージを表示
+    // ローディングアニメーションを表示
+    const loadingContainer = document.createElement('div');
+    loadingContainer.id = 'font-loading-container';
+    loadingContainer.style.position = 'absolute';
+    loadingContainer.style.top = '50%';
+    loadingContainer.style.left = '50%';
+    loadingContainer.style.transform = 'translate(-50%, -50%)';
+    loadingContainer.style.textAlign = 'center';
+    loadingContainer.style.zIndex = '1000';
+    loadingContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+    loadingContainer.style.padding = '25px';
+    loadingContainer.style.borderRadius = '12px';
+    loadingContainer.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)';
+    loadingContainer.style.width = '300px';
+    loadingContainer.style.border = '1px solid rgba(25, 118, 210, 0.2)';
+    
+    // ローディングメッセージ
     const loadingMessage = document.createElement('div');
-    loadingMessage.style.position = 'absolute';
-    loadingMessage.style.top = '50%';
-    loadingMessage.style.left = '50%';
-    loadingMessage.style.transform = 'translate(-50%, -50%)';
     loadingMessage.style.color = '#1976D2';
     loadingMessage.style.fontSize = '20px';
     loadingMessage.style.fontWeight = 'bold';
-    loadingMessage.textContent = 'フォントを読み込み中...';
-    document.body.appendChild(loadingMessage);
+    loadingMessage.style.marginBottom = '15px';
+    loadingMessage.textContent = '日本語フォントを読み込み中...';
+    
+    // ローディングスピナー
+    const spinner = document.createElement('div');
+    spinner.style.border = '6px solid #f3f3f3';
+    spinner.style.borderTop = '6px solid #1976D2';
+    spinner.style.borderRadius = '50%';
+    spinner.style.width = '50px';
+    spinner.style.height = '50px';
+    spinner.style.margin = '0 auto';
+    spinner.style.animation = 'spin 1s linear infinite';
+    
+    // 進捗メッセージ
+    const progressMessage = document.createElement('div');
+    progressMessage.style.color = '#666';
+    progressMessage.style.fontSize = '14px';
+    progressMessage.style.marginTop = '15px';
+    progressMessage.style.fontStyle = 'italic';
+    progressMessage.textContent = '少々お待ちください...';
+    
+    // スピナーのアニメーションスタイルを追加
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 要素を追加
+    loadingContainer.appendChild(loadingMessage);
+    loadingContainer.appendChild(spinner);
+    loadingContainer.appendChild(progressMessage);
+    document.body.appendChild(loadingContainer);
+    
+    // 選択されたフォントに基づいてフォントURLを設定
+    let fontUrl;
+    switch (params.fontType) {
+        case 'noto-sans-jp':
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@4.5.0/files/noto-sans-jp-japanese-400-normal.woff';
+            break;
+        case 'noto-serif-jp':
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-jp@4.5.0/files/noto-serif-jp-japanese-400-normal.woff';
+            break;
+        case 'mplus-1p':
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/m-plus-1p@4.5.0/files/m-plus-1p-japanese-400-normal.woff';
+            break;
+        case 'mplus-rounded-1c':
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/m-plus-rounded-1c@4.5.0/files/m-plus-rounded-1c-japanese-400-normal.woff';
+            break;
+        case 'kosugi-maru':
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/kosugi-maru@4.5.0/files/kosugi-maru-japanese-400-normal.woff';
+            break;
+        case 'kosugi':
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/kosugi@4.5.0/files/kosugi-japanese-400-normal.woff';
+            break;
+        case 'sawarabi-gothic':
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/sawarabi-gothic@4.5.0/files/sawarabi-gothic-japanese-400-normal.woff';
+            break;
+        case 'sawarabi-mincho':
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/sawarabi-mincho@4.5.0/files/sawarabi-mincho-japanese-400-normal.woff';
+            break;
+        default:
+            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@4.5.0/files/noto-sans-jp-japanese-400-normal.woff';
+    }
     
     // 日本語フォントを読み込む
-    opentype.load('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@4.5.0/files/noto-sans-jp-japanese-400-normal.woff', function(err, font) {
-        // ローディングメッセージを削除
-        document.body.removeChild(loadingMessage);
+    opentype.load(fontUrl, function(err, font) {
+        // ローディングコンテナを削除
+        const loadingContainer = document.getElementById('font-loading-container');
+        if (loadingContainer) {
+            document.body.removeChild(loadingContainer);
+        }
+        
+        // フォント読み込み完了メッセージを表示（一時的に）
+        const completionMessage = document.createElement('div');
+        completionMessage.style.position = 'absolute';
+        completionMessage.style.top = '20px';
+        completionMessage.style.left = '50%';
+        completionMessage.style.transform = 'translateX(-50%)';
+        completionMessage.style.backgroundColor = 'rgba(76, 175, 80, 0.9)';
+        completionMessage.style.color = 'white';
+        completionMessage.style.padding = '10px 20px';
+        completionMessage.style.borderRadius = '5px';
+        completionMessage.style.zIndex = '1000';
+        completionMessage.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        completionMessage.style.animation = 'fadeInOut 2s forwards';
+        completionMessage.textContent = 'フォントの読み込みが完了しました';
+        document.body.appendChild(completionMessage);
+        
+        // フェードイン・フェードアウトのアニメーション
+        const fadeStyle = document.createElement('style');
+        fadeStyle.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; }
+                20% { opacity: 1; }
+                80% { opacity: 1; }
+                100% { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(fadeStyle);
+        
+        // 2秒後にメッセージを削除
+        setTimeout(() => {
+            if (document.body.contains(completionMessage)) {
+                document.body.removeChild(completionMessage);
+            }
+        }, 2000);
         
         if (err) {
             console.error('フォントの読み込みに失敗しました:', err);
