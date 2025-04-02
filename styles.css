@@ -761,6 +761,7 @@ header p {
 .footer p {
     font-size: 0.9rem;
     color: #666;
+    margin-top: 10px;
 }
 
 .footer a {
@@ -772,4 +773,31 @@ header p {
 .footer a:hover {
     color: #1565C0;
     text-decoration: underline;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.footer-links a {
+    font-size: 0.95rem;
+    color: #1976D2;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-links a:hover {
+    color: #1565C0;
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .footer-links {
+        flex-direction: column;
+        gap: 10px;
+    }
 }

@@ -339,10 +339,10 @@ function initCollapsibleSections() {
 // テクスチャの初期化
 function initTextures() {
     // 基本テクスチャをロード
-    textures.brick = textureLoader.load('brick.jpg');
-    textures.wood = textureLoader.load('wood.jpg');
-    textures.concrete = textureLoader.load('floor.jpg');
-    textures.fabric = textureLoader.load('grass.jpg');
+    textures.brick = textureLoader.load('images/brick.jpg');
+    textures.wood = textureLoader.load('images/wood.jpg');
+    textures.concrete = textureLoader.load('images/floor.jpg');
+    textures.fabric = textureLoader.load('images/grass.jpg');
     
     // テクスチャの繰り返し設定
     Object.values(textures).forEach(texture => {

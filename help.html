@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ヘルプ - ハコモジ（hacomoji）</title>
+
+    <link rel="shortcut icon" href="./images/favicon.png" type="image/x-icon">
+    
+    <!-- メタタグ -->
+    <meta name="description" content="ハコモジ（hacomoji）のヘルプページです。よくある質問や使い方のガイドを掲載しています。">
+    
+    <!-- カノニカルタグ -->
+    <link rel="canonical" href="https://hacomoji.com/help.html">
+    
+    <link rel="stylesheet" href="styles.css">
+    <!-- Google Fonts - 英字フォント -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Google Fonts - 日本語フォント -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=M+PLUS+1p:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&family=Kosugi+Maru&family=Sawarabi+Gothic&family=Sawarabi+Mincho&family=Kosugi&display=swap" rel="stylesheet">
+    
+    <style>
+        .page-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .page-content h2 {
+            color: #1976D2;
+            border-bottom: 2px solid #1976D2;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        
+        .page-content h3 {
+            color: #333;
+            margin-top: 25px;
+            font-size: 1.2rem;
+        }
+        
+        .page-content p {
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .page-content ul, .page-content ol {
+            margin-bottom: 20px;
+            padding-left: 25px;
+        }
+        
+        .page-content li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: #1976D2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        
+        .faq-item {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        
+        .faq-question {
+            font-weight: bold;
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .faq-answer {
+            line-height: 1.8;
+        }
+        
+        .help-section {
+            margin-bottom: 40px;
+        }
+        
+        .help-toc {
+            background-color: #f5f5f5;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .help-toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .help-toc li {
+            margin-bottom: 8px;
+        }
+        
+        .help-toc a {
+            color: #1976D2;
+            text-decoration: none;
+        }
+        
+        .help-toc a:hover {
+            text-decoration: underline;
+        }
+        
+        .step-by-step {
+            counter-reset: step-counter;
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .step-by-step li {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .step-by-step li::before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: #1976D2;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><a href="index.html"><img src="./images/hacomoji-logo.png" alt="箱モジ hacomoji" width="350px"></a></h1>
+            <p>テキスト専用3Dモデリングサービス「ハコモジ」</p>
+        </header>
+        
+        <div class="page-content">
+            <h1>ヘルプ</h1>
+            
+            <div class="help-toc">
+                <h2>目次</h2>
+                <ul>
+                    <li><a href="#basic-usage">基本的な使い方</a></li>
+                    <li><a href="#parameters">パラメーターの説明</a></li>
+                    <li><a href="#export">エクスポート方法</a></li>
+                    <li><a href="#troubleshooting">トラブルシューティング</a></li>
+                    <li><a href="#faq">よくある質問</a></li>
+                </ul>
+            </div>
+            
+            <div id="basic-usage" class="help-section">
+                <h2>基本的な使い方</h2>
+                <p>ハコモジは、テキストを3Dモデルとして表示・出力できるオンラインサービスです。以下の手順で簡単に3Dテキストを作成できます。</p>
+                
+                <ol class="step-by-step">
+                    <li>トップページの入力欄に表示したいテキストを入力します。日本語、英語どちらも対応しています。</li>
+                    <li>「生成」ボタンをクリックすると、入力したテキストが3Dモデルとして表示されます。</li>
+                    <li>右側のコントロールパネルで、サイズ、厚み、色、テクスチャなど様々なパラメーターを調整できます。</li>
+                    <li>作成したモデルは、STL、OBJ、PNG形式でエクスポートできます。</li>
+                </ol>
+                
+                <p>3Dビューでは、マウス操作で以下のことができます：</p>
+                <ul>
+                    <li><strong>回転：</strong>マウスの左ボタンを押しながらドラッグ</li>
+                    <li><strong>ズーム：</strong>マウスホイールを回転、またはピンチイン・ピンチアウト（タッチデバイス）</li>
+                    <li><strong>移動：</strong>マウスの右ボタンを押しながらドラッグ、または2本指でドラッグ（タッチデバイス）</li>
+                </ul>
+            </div>
+            
+            <div id="parameters" class="help-section">
+                <h2>パラメーターの説明</h2>
+                
+                <h3>形状</h3>
+                <ul>
+                    <li><strong>サイズ：</strong>文字の大きさを調整します。</li>
+                    <li><strong>厚み：</strong>文字の奥行きを調整します。</li>
+                    <li><strong>ベベル：</strong>文字のエッジを丸くする機能です。チェックを入れると有効になります。</li>
+                    <li><strong>ベベル厚さ：</strong>ベベルの厚さを調整します。</li>
+                    <li><strong>ベベルサイズ：</strong>ベベルのサイズを調整します。</li>
+                    <li><strong>カーブ解像度：</strong>曲線部分の滑らかさを調整します。値が大きいほど滑らかになりますが、処理が重くなる場合があります。</li>
+                    <li><strong>文字の間隔：</strong>文字と文字の間隔を調整します。</li>
+                    <li><strong>文字変形：</strong>文字の形状を変形させる機能です。横幅、縦幅、前方すぼみ、後方すぼみなどを調整できます。</li>
+                    <li><strong>フォント：</strong>文字のフォントを選択します。日本語フォントと英字フォントが用意されています。</li>
+                </ul>
+                
+                <h3>色・テクスチャ</h3>
+                <ul>
+                    <li><strong>マテリアル：</strong>モデルの表面素材を選択します。標準、フォン、ランバート、ワイヤーフレームから選べます。</li>
+                    <li><strong>色：</strong>モデルの色を選択します。</li>
+                    <li><strong>質感(粗さ)：</strong>表面の粗さを調整します。値が大きいほど粗くなります。</li>
+                    <li><strong>反射率：</strong>表面の金属的な反射の強さを調整します。</li>
+                    <li><strong>透明度：</strong>モデルの透明度を調整します。</li>
+                    <li><strong>テクスチャ：</strong>モデルの表面にテクスチャを適用します。レンガ、木目、コンクリート、ファブリックなどが選べます。</li>
+                </ul>
+                
+                <h3>光源</h3>
+                <ul>
+                    <li><strong>メイン光源：</strong>主要な光源の有無、明るさ、色、位置を調整します。</li>
+                    <li><strong>環境光：</strong>全体を均等に照らす光の有無、明るさ、色を調整します。</li>
+                    <li><strong>サブ光源：</strong>補助的な光源の有無、明るさ、色、位置を調整します。</li>
+                </ul>
+                
+                <h3>回転アニメーション</h3>
+                <ul>
+                    <li><strong>回転：</strong>モデルを自動的に回転させる機能です。</li>
+                    <li><strong>回転軸：</strong>回転の軸を選択します（X軸、Y軸、Z軸）。</li>
+                    <li><strong>回転速度：</strong>回転の速さを調整します。</li>
+                    <li><strong>動画出力：</strong>回転アニメーションを動画として保存できます。品質、フレームレート、長さを設定できます。</li>
+                </ul>
+            </div>
+            
+            <div id="export" class="help-section">
+                <h2>エクスポート方法</h2>
+                <p>ハコモジでは、作成した3Dテキストモデルを以下の形式でエクスポートできます：</p>
+                
+                <h3>STLファイル</h3>
+                <p>3Dプリンターで最も一般的に使用されるフォーマットです。「STLで保存」ボタンをクリックすると、STLファイルがダウンロードされます。</p>
+                
+                <h3>OBJファイル</h3>
+                <p>多くの3Dモデリングソフトで使用できるフォーマットです。「OBJで保存」ボタンをクリックすると、OBJファイルがダウンロードされます。</p>
+                
+                <h3>透過PNG画像</h3>
+                <p>3Dモデルを2D画像として保存します。背景が透明なPNG形式でダウンロードされます。解像度は標準（1x）、高解像度（2x）、超高解像度（4x）から選べます。</p>
+                
+                <h3>動画（WebM形式）</h3>
+                <p>回転アニメーションを動画として保存できます。以下の手順で操作します：</p>
+                <ol>
+                    <li>「回転アニメーション」セクションを開きます。</li>
+                    <li>「回転」にチェックを入れます。</li>
+                    <li>回転軸と速度を設定します。</li>
+                    <li>動画の品質、フレームレート、長さを設定します。</li>
+                    <li>「録画開始」ボタンをクリックします。</li>
+                    <li>録画が完了すると、自動的にWebM形式の動画ファイルがダウンロードされます。</li>
+                </ol>
+            </div>
+            
+            <div id="troubleshooting" class="help-section">
+                <h2>トラブルシューティング</h2>
+                
+                <h3>3Dモデルが表示されない</h3>
+                <p>以下の対処法をお試しください：</p>
+                <ul>
+                    <li>ブラウザを最新バージョンに更新する</li>
+                    <li>ブラウザのキャッシュをクリアする</li>
+                    <li>別のブラウザで試す（Google Chrome推奨）</li>
+                    <li>WebGLが有効になっているか確認する</li>
+                </ul>
+                
+                <h3>動作が遅い・重い</h3>
+                <p>以下の対処法をお試しください：</p>
+                <ul>
+                    <li>テキストの文字数を減らす</li>
+                    <li>カーブ解像度の値を下げる</li>
+                    <li>ベベルを無効にする</li>
+                    <li>他のアプリケーションを閉じる</li>
+                </ul>
+                
+                <h3>日本語フォントが正しく表示されない</h3>
+                <p>以下の対処法をお試しください：</p>
+                <ul>
+                    <li>別の日本語フォントを選択する</li>
+                    <li>ブラウザのキャッシュをクリアする</li>
+                    <li>文字数を減らしてみる</li>
+                </ul>
+                
+                <h3>エクスポートしたファイルが開けない</h3>
+                <p>以下の対処法をお試しください：</p>
+                <ul>
+                    <li>別のビューアーやソフトウェアで開いてみる</li>
+                    <li>モデルの複雑さを減らす（文字数を減らす、カーブ解像度を下げるなど）</li>
+                    <li>別の形式でエクスポートしてみる</li>
+                </ul>
+            </div>
+            
+            <div id="faq" class="help-section">
+                <h2>よくある質問</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Q: ハコモジは無料で使えますか？</div>
+                    <div class="faq-answer">A: はい、ハコモジは基本機能を無料でご利用いただけます。エクスポート機能も含めて、すべての機能が無料でお使いいただけます。</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Q: 作成したモデルを商用利用できますか？</div>
+                    <div class="faq-answer">A: はい、ハコモジで作成したモデルは商用利用可能です。ただし、使用するフォントによっては別途ライセンスが必要な場合がありますので、ご注意ください。</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Q: 対応しているブラウザは何ですか？</div>
+                    <div class="faq-answer">A: Google Chrome、Firefox、Safari、Microsoft Edgeの最新バージョンに対応しています。特にGoogle Chromeでの利用を推奨しています。</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Q: スマートフォンやタブレットでも使えますか？</div>
+                    <div class="faq-answer">A: はい、モバイルデバイスにも対応していますが、画面サイズの制約により、一部の機能が使いにくい場合があります。より快適にご利用いただくには、PCでのアクセスをおすすめします。</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Q: 3Dプリンターで出力する際の注意点はありますか？</div>
+                    <div class="faq-answer">A: STLファイルをエクスポートする際は、文字のサイズや厚みを適切に設定してください。また、複雑な形状や薄すぎる部分は、プリンターによっては正確に出力できない場合があります。プリンターの仕様に合わせて調整することをおすすめします。</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Q: カスタムフォントを使用できますか？</div>
+                    <div class="faq-answer">A: 現在のバージョンでは、システムに用意されているフォントのみ使用可能です。カスタムフォントのアップロード機能は今後のアップデートで検討しています。</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Q: 作成したモデルを保存して後で編集することはできますか？</div>
+                    <div class="faq-answer">A: 現在のバージョンでは、セッション間でのモデル保存機能はありません。ブラウザを閉じると設定は失われますので、必要に応じてエクスポートしてください。プロジェクト保存機能は今後のアップデートで検討しています。</div>
+                </div>
+            </div>
+            
+            <p>その他のご質問やお問い合わせは、<a href="contact.html">お問い合わせフォーム</a>からお寄せください。</p>
+            
+            <a href="index.html" class="back-link">トップページに戻る</a>
+        </div>
+    </div>
+    
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="about.html">当サイトについて</a>
+                <a href="terms.html">利用規約</a>
+                <a href="privacy.html">プライバシーポリシー</a>
+                <a href="help.html">ヘルプ</a>
+                <a href="contact.html">お問い合わせ</a>
+                <a href="https://wapon.co.jp" target="_blank" rel="noopener">運営会社</a>
+            </div>
+            <p>&copy; 2025 箱モジ（hacomoji）</p>
+        </div>
+    </footer>
+</body>
+</html>
