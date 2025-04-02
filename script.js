@@ -1436,12 +1436,11 @@ function startRecording() {
     startRecordingBtn.textContent = '録画中...';
     stopRecordingBtn.disabled = false;
 }
-
 // 録画停止
 function stopRecording() {
     if (!isRecording) return;
     
-    // 録画停止
+    // 録画停止（回転は継続）
     isRecording = false;
     fullRotationRecording = false; // 一周録画モードをリセット
     capturer.stop();
@@ -1464,6 +1463,8 @@ function stopRecording() {
     startRecordingBtn.disabled = false;
     startRecordingBtn.textContent = '録画開始';
     stopRecordingBtn.disabled = true;
+    
+    // 回転は継続させる（params.rotationEnabledはそのまま）
 }
 // ジオメトリに変形を適用する
 function applyTransformToGeometry(geometry) {

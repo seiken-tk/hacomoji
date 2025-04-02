@@ -372,6 +372,16 @@ header p {
     margin-left: 2px;
 }
 
+/* 動画情報のスタイル */
+.video-info {
+    font-size: 0.8rem;
+    color: #777;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    text-align: center;
+    font-style: italic;
+}
+
 /* 入れ子になったコントロールのグリッド調整 */
 .bevel-control input[type="range"],
 .material-control input[type="range"],
