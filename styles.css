@@ -4,10 +4,29 @@
     box-sizing: border-box;
 }
 
+:root {
+    --primary-color: #1976D2;
+    --primary-dark: #1565C0;
+    --primary-light: #e8f0fe;
+    --accent-color: #FF4081;
+    --text-color: #333;
+    --text-light: #666;
+    --bg-color: #f5f5f5;
+    --card-bg: #ffffff;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --slider-track: #e0e0e0;
+    --slider-thumb: var(--primary-color);
+    --slider-thumb-hover: var(--primary-dark);
+    --section-header-bg: #f8f9fa;
+    --section-header-active: linear-gradient(135deg, #1976D2, #2196F3);
+    --border-radius: 8px;
+    --transition-speed: 0.3s;
+}
+
 body {
     font-family: 'Noto Sans JP', 'Hiragino Sans', 'Meiryo', sans-serif;
-    background-color: #f5f5f5;
-    color: #333;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     line-height: 1.6;
 }
 
@@ -103,104 +122,187 @@ header p {
 
 .controls {
     width: 100%;
-    padding: 20px;
-    background-color: white;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
     transform-style: flat;
     perspective: none;
     transform: none;
     position: static;
+    max-height: 80vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+    box-sizing: border-box;
+}
+
+.controls::-webkit-scrollbar {
+    width: 6px;
+}
+
+.controls::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.controls::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 6px;
 }
 
 @media (min-width: 768px) {
     .controls {
-        width: 300px;
+        width: 320px;
     }
 }
 
 .collapsible-section {
-    margin-bottom: 15px;
-    border-radius: 6px;
+    margin-bottom: 16px;
+    border-radius: var(--border-radius);
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background-color: var(--card-bg);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: box-shadow var(--transition-speed);
+}
+
+.collapsible-section:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 15px;
-    background-color: #f8f8f8;
-    border-bottom: 1px solid #eee;
+    padding: 14px 18px;
+    background-color: var(--section-header-bg);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all var(--transition-speed);
+    position: relative;
+    overflow: hidden;
+}
+
+.section-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background-color: var(--primary-color);
+    opacity: 0;
+    transition: opacity var(--transition-speed);
 }
 
 .section-header:hover {
-    background-color: #f0f0f0;
+    background-color: rgba(25, 118, 210, 0.05);
+}
+
+.section-header:hover::before {
+    opacity: 0.5;
 }
 
 .section-header.open {
-    background-color: #e8f0fe;
-    border-bottom: 1px solid #d0e0fc;
+    background: var(--section-header-active);
+    color: white;
+    border-bottom: none;
+}
+
+.section-header.open::before {
+    opacity: 1;
 }
 
 .section-header h3 {
     margin: 0;
-    color: #1976D2;
+    color: var(--primary-color);
     font-size: 1.1rem;
     font-weight: 600;
+    transition: color var(--transition-speed);
+    display: flex;
+    align-items: center;
+}
+
+.section-header.open h3 {
+    color: white;
 }
 
 .toggle-icon {
-    color: #1976D2;
+    color: var(--primary-color);
     font-size: 0.9rem;
-    transition: transform 0.3s;
+    transition: all var(--transition-speed);
 }
 
 .section-header.open .toggle-icon {
     transform: rotate(180deg);
+    color: white;
 }
 
 .section-content {
-    padding: 15px;
-    background-color: white;
-    transition: max-height 0.3s ease-out;
+    padding: 14px;
+    background-color: var(--card-bg);
+    transition: all var(--transition-speed);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .export-group {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: white;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-top: 24px;
+    padding: 20px;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.export-group::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
 }
 
 .export-group h3 {
     margin-top: 0;
-    margin-bottom: 15px;
-    color: #1976D2;
+    margin-bottom: 18px;
+    color: var(--primary-color);
     font-size: 1.1rem;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.export-group h3::before {
+    content: '↓';
+    margin-right: 8px;
+    font-size: 1.2rem;
+    color: var(--accent-color);
 }
 
 .control-item {
-    margin-bottom: 15px;
+    margin-bottom: 18px;
     display: grid;
-    grid-template-columns: 100px 1fr auto;
+    grid-template-columns: 110px minmax(0, 1fr) auto;
     align-items: center;
     gap: 10px;
     position: static;
     transform: none;
+    transition: all var(--transition-speed);
+    width: 100%;
+    overflow: hidden;
+}
+
+.control-item:last-child {
+    margin-bottom: 8px;
 }
 
 /* モバイル表示のレイアウト調整 */
 @media (max-width: 767px) {
     .control-item {
-        grid-template-columns: 90px 1fr auto;
-        gap: 5px;
+        grid-template-columns: 90px minmax(0, 1fr) auto;
+        gap: 6px;
     }
     
     .control-item label {
@@ -212,70 +314,193 @@ header p {
     }
     
     .bevel-control label, .material-control label {
-        padding-left: 5px;
+        padding-left: 4px;
     }
 }
 
 .control-item label {
     grid-column: 1;
     font-size: 0.9rem;
-    color: #555;
+    color: var(--text-light);
+    font-weight: 500;
+    transition: color var(--transition-speed);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+.control-item:hover label {
+    color: var(--primary-color);
+}
+
+/* スライダーのスタイル */
 .control-item input[type="range"] {
     grid-column: 2;
     width: 100%;
     margin-right: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: var(--slider-track);
+    border-radius: 3px;
+    outline: none;
+    transition: all var(--transition-speed);
+    max-width: 100%; /* 最大幅を親要素に合わせる */
+}
+
+.control-item input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--slider-thumb);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.control-item input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--slider-thumb);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.control-item input[type="range"]:hover::-webkit-slider-thumb {
+    background: var(--slider-thumb-hover);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.control-item input[type="range"]:hover::-moz-range-thumb {
+    background: var(--slider-thumb-hover);
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.control-item input[type="range"]:focus {
+    background: linear-gradient(to right, var(--primary-light), var(--slider-track));
 }
 
 .value-display {
     grid-column: 3;
-    width: 30px;
-    text-align: right;
-    font-size: 0.9rem;
-    color: #666;
+    min-width: 36px;
+    width: 36px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    background-color: var(--primary-light);
+    padding: 2px 6px;
+    border-radius: 10px;
+    transition: all var(--transition-speed);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
 }
 
+.control-item:hover .value-display {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* カラーピッカーのスタイル */
 .control-item input[type="color"] {
     grid-column: 2;
     width: 40px;
-    height: 30px;
+    height: 40px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     cursor: pointer;
+    transition: all var(--transition-speed);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.control-item input[type="color"]:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* セレクトボックスのスタイル */
 .control-item select {
     grid-column: 2 / span 2;
     width: 100%;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
     outline: none;
-    height: 30px;
-    background-color: white;
+    height: 36px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    
+    position: static !important;
+    z-index: auto !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    transform: none !important;
+    transform-style: flat !important;
+    perspective: none !important;
+    
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%231976D2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+}
+
+.control-item select:hover, .control-item select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* チェックボックスのスタイル調整 */
 .control-item input[type="checkbox"] {
     grid-column: 2;
     margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 40px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: #ccc;
+    position: relative;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    outline: none;
 }
 
-/* セレクトボックスのスタイル調整 */
-.control-item select {
-    position: static !important;
-    z-index: auto !important;
-    appearance: menulist !important;
-    -webkit-appearance: menulist !important;
-    -moz-appearance: menulist !important;
-    transform: none !important;
-    transform-style: flat !important;
-    perspective: none !important;
-    /* Safari用の追加対策 */
-    -webkit-transform: none !important;
-    -webkit-transform-style: flat !important;
-    -webkit-perspective: none !important;
+.control-item input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: all var(--transition-speed);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.control-item input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+}
+
+.control-item input[type="checkbox"]:checked::before {
+    left: 22px;
+}
+
+.control-item input[type="checkbox"]:hover {
+    box-shadow: 0 0 5px rgba(25, 118, 210, 0.5);
 }
 
 /* Firefox用の追加対策 */
@@ -297,11 +522,17 @@ header p {
 /* 削除：重複したスタイル定義 */
 
 .bevel-control, .material-control, .texture-control, .shadow-control, .light-control, .transform-control, .rotation-control, .video-control {
-    padding-left: 20px;
+    padding-left: 15px;
+    border-left: 2px solid var(--primary-light);
+    margin-left: 5px;
 }
 
 .bevel-control label, .material-control label, .texture-control label, .shadow-control label, .light-control label, .transform-control label, .rotation-control label, .video-control label {
-    padding-left: 10px;
+    padding-left: 5px;
+    font-size: 0.85rem;
+    white-space: normal; /* ラベルを複数行で表示できるようにする */
+    overflow: visible; /* オーバーフローを表示 */
+    text-overflow: clip; /* 省略記号を表示しない */
 }
 
 /* 回転コントロールは常に表示 */
@@ -313,28 +544,62 @@ header p {
 .video-buttons {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
+    margin-top: 18px;
+    gap: 10px;
 }
 
 .video-button {
-    padding: 8px 15px;
-    background-color: #1976D2;
+    padding: 10px 15px;
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
     flex: 1;
-    margin: 0 5px;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.video-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+    z-index: -1;
 }
 
 .video-button:hover {
-    background-color: #1565C0;
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.video-button:hover::after {
+    left: 0;
+}
+
+.video-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .video-button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.video-button:disabled::after {
+    display: none;
 }
 
 /* 変形コントロールの初期状態 */
@@ -356,30 +621,44 @@ header p {
 .texture-control input[type="file"] {
     grid-column: 2 / span 2;
     width: 100%;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
     font-size: 0.9rem;
+    background-color: var(--card-bg);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.texture-control input[type="file"]:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* テクスチャ情報のスタイル */
 .texture-info {
     grid-column: 2 / span 2;
     display: block;
-    font-size: 0.8rem;
-    color: #777;
-    margin-top: 5px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 6px;
     margin-left: 2px;
+    font-style: italic;
 }
 
 /* 動画情報のスタイル */
 .video-info {
-    font-size: 0.8rem;
-    color: #777;
-    margin-top: 10px;
-    margin-bottom: 5px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 12px;
+    margin-bottom: 8px;
     text-align: center;
     font-style: italic;
+    padding: 8px;
+    background-color: var(--primary-light);
+    border-radius: var(--border-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* 入れ子になったコントロールのグリッド調整 */
@@ -397,18 +676,47 @@ header p {
 
 .export-group button {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
     background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
+    font-weight: 500;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.export-group button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+    z-index: -1;
 }
 
 .export-group button:hover {
     background-color: #43A047;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.export-group button:hover::after {
+    left: 0;
+}
+
+.export-group button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #export-obj {
