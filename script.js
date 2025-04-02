@@ -1329,16 +1329,12 @@ function toggleRotationControls() {
     // チェックボックスの状態を取得
     params.rotationEnabled = rotationEnabledCheckbox.checked;
     
-    // 回転アニメーションコントロールの表示/非表示を切り替え
-    const rotationControls = document.querySelectorAll('.rotation-control');
+    // 回転アニメーションコントロールは常に表示（CSSで設定済み）
+    
+    // 動画出力コントロールのみ回転アニメーションの状態に連動させる
+    const videoControls = document.querySelectorAll('.video-control');
     const display = params.rotationEnabled ? 'flex' : 'none';
     
-    rotationControls.forEach(control => {
-        control.style.display = display;
-    });
-    
-    // 動画出力コントロールも回転アニメーションの状態に連動させる
-    const videoControls = document.querySelectorAll('.video-control');
     videoControls.forEach(control => {
         control.style.display = display;
     });

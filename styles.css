@@ -304,9 +304,9 @@ header p {
     padding-left: 10px;
 }
 
-/* 回転コントロールの初期状態 */
+/* 回転コントロールは常に表示 */
 .rotation-control {
-    display: none;
+    display: flex;
 }
 
 /* 動画ボタンのスタイル */
