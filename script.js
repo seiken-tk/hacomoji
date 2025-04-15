@@ -1713,7 +1713,7 @@ function toggleRotationControls() {
     
     // 回転アニメーションコントロールは常に表示（CSSで設定済み）
     
-    // 動画出力コントロールのみ回転アニメーションの状態に連動させる
+    // 動画出力セクション全体を回転アニメーションの状態に連動させる
     const videoControls = document.querySelectorAll('.video-control');
     const display = params.rotationEnabled ? 'flex' : 'none';
     
@@ -1725,6 +1725,18 @@ function toggleRotationControls() {
     const videoButtons = document.querySelector('.video-buttons');
     if (videoButtons) {
         videoButtons.style.display = params.rotationEnabled ? 'flex' : 'none';
+    }
+    
+    // 動画出力の見出しと説明文の表示/非表示
+    const videoHeading = document.querySelector('#rotation-content h4');
+    const videoInfo = document.querySelector('.video-info');
+    
+    if (videoHeading) {
+        videoHeading.style.display = params.rotationEnabled ? 'block' : 'none';
+    }
+    
+    if (videoInfo) {
+        videoInfo.style.display = params.rotationEnabled ? 'block' : 'none';
     }
 }
 
