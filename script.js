@@ -14,6 +14,8 @@ let isRecording = false;
 let rotationAngle = 0; // 回転角度を追跡する変数
 let startRotationAngle = 0; // 録画開始時の回転角度
 let fullRotationRecording = false; // 一周録画モードのフラグ
+let svgLoader; // SVGローダー
+let currentMode = 'text'; // 現在のモード（'text' または 'svg'）
 
 // パラメーター
 const params = {
@@ -100,6 +102,13 @@ const exportOBJBtn = document.getElementById('export-obj');
 const exportPNGBtn = document.getElementById('export-png');
 const pngResolutionSelect = document.getElementById('png-resolution');
 
+// SVG関連のDOM要素
+const tabBtns = document.querySelectorAll('.tab-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+const svgUpload = document.getElementById('svg-upload');
+const svgFilename = document.getElementById('svg-filename');
+const svgGenerateBtn = document.getElementById('svg-generate-btn');
+
 // 文字変形のDOM要素
 const transformEnabledCheckbox = document.getElementById('transform-enabled');
 const horizontalScaleSlider = document.getElementById('horizontal-scale');
@@ -162,6 +171,37 @@ textInput.addEventListener('keypress', (e) => {
     }
 });
 
+// タブ切り替え
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // アクティブなタブを更新
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // タブコンテンツを表示/非表示
+        const tabId = btn.getAttribute('data-tab');
+        tabContents.forEach(content => {
+            content.style.display = content.id === tabId ? 'flex' : 'none';
+        });
+        
+        // 現在のモードを更新
+        currentMode = tabId === 'text-tab' ? 'text' : 'svg';
+    });
+});
+
+// SVGファイルアップロード
+svgUpload.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        svgFilename.textContent = file.name;
+    } else {
+        svgFilename.textContent = 'ファイルが選択されていません';
+    }
+});
+
+// SVG生成ボタン
+svgGenerateBtn.addEventListener('click', processSVG);
+
 fontSizeSlider.addEventListener('input', updateValueDisplay);
 depthSlider.addEventListener('input', updateValueDisplay);
 bevelThicknessSlider.addEventListener('input', updateValueDisplay);
@@ -173,22 +213,22 @@ metalnessSlider.addEventListener('input', updateValueDisplay);
 opacitySlider.addEventListener('input', updateValueDisplay);
 textureScaleSlider.addEventListener('input', updateValueDisplay);
 
-fontSizeSlider.addEventListener('change', updateGeometry);
-depthSlider.addEventListener('change', updateGeometry);
-bevelEnabledCheckbox.addEventListener('change', updateGeometry);
-bevelThicknessSlider.addEventListener('change', updateGeometry);
-bevelSizeSlider.addEventListener('change', updateGeometry);
-curveSegmentsSlider.addEventListener('change', updateGeometry);
-letterSpacingSlider.addEventListener('change', updateGeometry);
+fontSizeSlider.addEventListener('change', updateParameters);
+depthSlider.addEventListener('change', updateParameters);
+bevelEnabledCheckbox.addEventListener('change', updateParameters);
+bevelThicknessSlider.addEventListener('change', updateParameters);
+bevelSizeSlider.addEventListener('change', updateParameters);
+curveSegmentsSlider.addEventListener('change', updateParameters);
+letterSpacingSlider.addEventListener('change', updateParameters);
 fontTypeSelect.addEventListener('change', updateFont);
-materialTypeSelect.addEventListener('change', updateMaterial);
-colorPicker.addEventListener('change', updateMaterial);
-roughnessSlider.addEventListener('change', updateMaterial);
-metalnessSlider.addEventListener('change', updateMaterial);
-opacitySlider.addEventListener('change', updateMaterial);
-textureEnabledCheckbox.addEventListener('change', toggleTextureControls);
-textureSelect.addEventListener('change', updateTexture);
-textureScaleSlider.addEventListener('change', updateTexture);
+materialTypeSelect.addEventListener('change', updateParameters);
+colorPicker.addEventListener('change', updateParameters);
+roughnessSlider.addEventListener('change', updateParameters);
+metalnessSlider.addEventListener('change', updateParameters);
+opacitySlider.addEventListener('change', updateParameters);
+textureEnabledCheckbox.addEventListener('change', updateParameters);
+textureSelect.addEventListener('change', updateParameters);
+textureScaleSlider.addEventListener('change', updateParameters);
 customTextureInput.addEventListener('change', handleCustomTexture);
 
 exportSTLBtn.addEventListener('click', exportSTL);
@@ -210,10 +250,10 @@ verticalScaleSlider.addEventListener('input', updateValueDisplay);
 frontTaperSlider.addEventListener('input', updateValueDisplay);
 backTaperSlider.addEventListener('input', updateValueDisplay);
 
-horizontalScaleSlider.addEventListener('change', updateTransform);
-verticalScaleSlider.addEventListener('change', updateTransform);
-frontTaperSlider.addEventListener('change', updateTransform);
-backTaperSlider.addEventListener('change', updateTransform);
+horizontalScaleSlider.addEventListener('change', updateParameters);
+verticalScaleSlider.addEventListener('change', updateParameters);
+frontTaperSlider.addEventListener('change', updateParameters);
+backTaperSlider.addEventListener('change', updateParameters);
 
 // グリッドの表示/非表示
 gridEnabledCheckbox.addEventListener('change', toggleGrid);
@@ -272,6 +312,9 @@ function init() {
     
     // フォントのロード
     loadFont();
+    
+    // SVGローダーの初期化
+    svgLoader = new THREE.SVGLoader();
     
     // スライダーの初期値を表示
     updateAllValueDisplays();
@@ -1067,13 +1110,232 @@ function animate() {
 function updateText() {
     params.text = textInput.value || '箱モジ';
     console.log('テキスト更新:', params.text);
+    currentMode = 'text';
     createText();
 }
 
-// ジオメトリの更新
-function updateGeometry() {
+// パラメーターの更新（モードに応じて適切な処理を呼び出す）
+function updateParameters() {
+    // 共通パラメーターの更新
     params.size = parseFloat(fontSizeSlider.value);
     params.depth = parseFloat(depthSlider.value);
+    params.bevelEnabled = bevelEnabledCheckbox.checked;
+    params.bevelThickness = parseFloat(bevelThicknessSlider.value);
+    params.bevelSize = parseFloat(bevelSizeSlider.value);
+    params.curveSegments = parseInt(curveSegmentsSlider.value);
+    params.letterSpacing = parseFloat(letterSpacingSlider.value);
+    
+    // 変形パラメーターの更新
+    params.transformEnabled = transformEnabledCheckbox.checked;
+    params.horizontalScale = parseFloat(horizontalScaleSlider.value);
+    params.verticalScale = parseFloat(verticalScaleSlider.value);
+    params.frontTaper = parseFloat(frontTaperSlider.value);
+    params.backTaper = parseFloat(backTaperSlider.value);
+    
+    // マテリアルとテクスチャのパラメーターも更新
+    params.materialType = materialTypeSelect.value;
+    params.color = colorPicker.value;
+    params.roughness = parseFloat(roughnessSlider.value);
+    params.metalness = parseFloat(metalnessSlider.value);
+    params.opacity = parseFloat(opacitySlider.value);
+    params.textureEnabled = textureEnabledCheckbox.checked;
+    params.textureType = textureSelect.value;
+    params.textureScale = parseFloat(textureScaleSlider.value);
+    
+    // テクスチャコントロールの表示/非表示を更新
+    const textureControls = document.querySelectorAll('.texture-control');
+    const display = params.textureEnabled ? 'flex' : 'none';
+    
+    textureControls.forEach(control => {
+        control.style.display = display;
+    });
+    
+    // カスタムテクスチャコンテナの表示/非表示
+    customTextureContainer.style.display =
+        (params.textureEnabled && params.textureType === 'custom') ? 'flex' : 'none';
+    
+    // 現在のモードに応じて適切な処理を呼び出す
+    if (currentMode === 'text') {
+        createText();
+    } else if (currentMode === 'svg') {
+        // 最後に読み込んだSVGデータがあれば再処理
+        if (window.lastLoadedSVG) {
+            createSVGModel(window.lastLoadedSVG);
+        }
+    }
+}
+
+// SVGの処理
+function processSVG() {
+    const file = svgUpload.files[0];
+    if (!file) {
+        // テスト用：ファイルが選択されていない場合は、テスト用のSVGを直接読み込む
+        console.log('テスト用SVGを読み込みます');
+        fetch('test-shape.svg')
+            .then(response => response.text())
+            .then(svgData => {
+                createSVGModel(svgData);
+            })
+            .catch(error => {
+                console.error('SVGの読み込みに失敗しました:', error);
+                alert('SVGファイルを選択してください');
+            });
+        return;
+        return;
+    }
+    
+    // ローディングアニメーションを表示
+    const loadingContainer = document.createElement('div');
+    loadingContainer.id = 'svg-loading-container';
+    loadingContainer.style.position = 'absolute';
+    loadingContainer.style.top = '50%';
+    loadingContainer.style.left = '50%';
+    loadingContainer.style.transform = 'translate(-50%, -50%)';
+    loadingContainer.style.textAlign = 'center';
+    loadingContainer.style.zIndex = '1000';
+    loadingContainer.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+    loadingContainer.style.padding = '25px';
+    loadingContainer.style.borderRadius = '12px';
+    loadingContainer.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)';
+    loadingContainer.style.width = '300px';
+    loadingContainer.style.border = '1px solid rgba(25, 118, 210, 0.2)';
+    
+    // ローディングメッセージ
+    const loadingMessage = document.createElement('div');
+    loadingMessage.style.color = '#1976D2';
+    loadingMessage.style.fontSize = '20px';
+    loadingMessage.style.fontWeight = 'bold';
+    loadingMessage.style.marginBottom = '15px';
+    loadingMessage.textContent = 'SVGファイルを処理中...';
+    
+    // ローディングスピナー
+    const spinner = document.createElement('div');
+    spinner.style.border = '6px solid #f3f3f3';
+    spinner.style.borderTop = '6px solid #1976D2';
+    spinner.style.borderRadius = '50%';
+    spinner.style.width = '50px';
+    spinner.style.height = '50px';
+    spinner.style.margin = '0 auto';
+    spinner.style.animation = 'spin 1s linear infinite';
+    
+    // 進捗メッセージ
+    const progressMessage = document.createElement('div');
+    progressMessage.style.color = '#666';
+    progressMessage.style.fontSize = '14px';
+    progressMessage.style.marginTop = '15px';
+    progressMessage.style.fontStyle = 'italic';
+    progressMessage.textContent = '少々お待ちください...';
+    
+    // 要素を追加
+    loadingContainer.appendChild(loadingMessage);
+    loadingContainer.appendChild(spinner);
+    loadingContainer.appendChild(progressMessage);
+    document.body.appendChild(loadingContainer);
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const svgData = e.target.result;
+        // SVGデータを保存して後で再利用できるようにする
+        window.lastLoadedSVG = svgData;
+        createSVGModel(svgData);
+        
+        // ローディングコンテナを削除
+        const loadingContainer = document.getElementById('svg-loading-container');
+        if (loadingContainer) {
+            document.body.removeChild(loadingContainer);
+        }
+    };
+    reader.readAsText(file);
+    
+    currentMode = 'svg';
+}
+
+// SVGデータから3Dモデルを作成
+function createSVGModel(svgData) {
+    // 既存のテキストメッシュをクリア
+    textGroup.clear();
+    
+    // SVGデータをパース
+    const svgPaths = svgLoader.parse(svgData);
+    
+    // マテリアルの作成
+    const material = createMaterial();
+    
+    // SVGのパスを処理
+    const paths = svgPaths.paths;
+    
+    // 全てのパスの境界ボックスを計算するための変数
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    
+    // 各パスの境界を計算
+    paths.forEach(path => {
+        path.subPaths.forEach(subPath => {
+            const points = subPath.getPoints();
+            points.forEach(point => {
+                minX = Math.min(minX, point.x);
+                maxX = Math.max(maxX, point.x);
+                minY = Math.min(minY, point.y);
+                maxY = Math.max(maxY, point.y);
+            });
+        });
+    });
+    
+    // SVGの中心と大きさを計算
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    const svgWidth = maxX - minX;
+    const svgHeight = maxY - minY;
+    
+    // スケール係数を計算（大きすぎるSVGを適切なサイズに調整）
+    const maxDimension = Math.max(svgWidth, svgHeight);
+    const scaleFactor = params.size * 2 / maxDimension;
+    
+    // 各パスを処理
+    paths.forEach(path => {
+        const shapes = path.toShapes(true);
+        
+        shapes.forEach(shape => {
+            // 押し出し設定
+            const extrudeSettings = {
+                steps: 1,
+                depth: params.depth,
+                bevelEnabled: params.bevelEnabled,
+                bevelThickness: params.bevelThickness,
+                bevelSize: params.bevelSize,
+                bevelSegments: 3,
+                curveSegments: params.curveSegments
+            };
+            
+            // ジオメトリを作成
+            const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+            
+            // ジオメトリをスケーリングして中心に配置
+            geometry.scale(scaleFactor, -scaleFactor, scaleFactor); // Y軸は反転
+            geometry.translate(-centerX * scaleFactor, -centerY * -scaleFactor, 0);
+            
+            // 変形が有効な場合、ジオメトリを変形
+            if (params.transformEnabled) {
+                applyTransformToGeometry(geometry);
+            }
+            
+            // メッシュの作成
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.renderOrder = 2;
+            
+            // グループに追加
+            textGroup.add(mesh);
+        });
+    });
+    
+    // 初期化完了
+    isInitialized = true;
+}
+
+// ジオメトリの更新（テキストモード専用）
+function updateGeometry() {
+    // パラメーターの更新関数を呼び出す
+    updateParameters();
     params.bevelEnabled = bevelEnabledCheckbox.checked;
     params.bevelThickness = parseFloat(bevelThicknessSlider.value);
     params.bevelSize = parseFloat(bevelSizeSlider.value);
@@ -1085,17 +1347,8 @@ function updateGeometry() {
 
 // マテリアルの更新
 function updateMaterial() {
-    params.materialType = materialTypeSelect.value;
-    params.color = colorPicker.value;
-    params.roughness = parseFloat(roughnessSlider.value);
-    params.metalness = parseFloat(metalnessSlider.value);
-    params.opacity = parseFloat(opacitySlider.value);
-    
-    // マテリアルコントロールの表示/非表示を更新
-    toggleMaterialControls();
-    
-    // テキストを再生成（マテリアルを適切に適用するため）
-    createText();
+    // パラメーターの更新関数を呼び出す
+    updateParameters();
 }
 
 // マテリアルコントロールの表示/非表示
@@ -1162,25 +1415,8 @@ function toggleBevelControls() {
 
 // テクスチャコントロールの表示/非表示
 function toggleTextureControls() {
-    const textureControls = document.querySelectorAll('.texture-control');
-    const display = textureEnabledCheckbox.checked ? 'flex' : 'none';
-    
-    textureControls.forEach(control => {
-        control.style.display = display;
-    });
-    
-    // カスタムテクスチャコンテナの表示/非表示
-    customTextureContainer.style.display =
-        (textureEnabledCheckbox.checked && textureSelect.value === 'custom') ? 'flex' : 'none';
-    
-    // テクスチャが有効な場合、マテリアルを更新
-    if (textureEnabledCheckbox.checked) {
-        updateTexture();
-    } else {
-        // テクスチャを無効にした場合、マテリアルを更新
-        params.textureEnabled = false;
-        createText();
-    }
+    // パラメーターの更新関数を呼び出す
+    updateParameters();
 }
 
 // 文字変形コントロールの表示/非表示
@@ -1222,40 +1458,35 @@ function toggleTransformControls() {
     }
 }
 
-// 変形パラメーターの更新
+// 変形パラメーターの更新（テキストモード専用）
 function updateTransform() {
-    params.transformEnabled = transformEnabledCheckbox.checked;
-    params.horizontalScale = parseFloat(horizontalScaleSlider.value);
-    params.verticalScale = parseFloat(verticalScaleSlider.value);
-    params.frontTaper = parseFloat(frontTaperSlider.value);
-    params.backTaper = parseFloat(backTaperSlider.value);
-    
-    createText();
+    // パラメーターの更新関数を呼び出す
+    updateParameters();
 }
 
 // STLエクスポート
 function exportSTL() {
-    if (!isInitialized || (params.fontType !== 'japanese' && !textMesh)) return;
+    if (!isInitialized || (currentMode === 'text' && params.fontType !== 'japanese' && !textMesh)) return;
     
     const exporter = new THREE.STLExporter();
     const result = exporter.parse(textGroup);
     
-    saveString(result, `${params.text}.stl`);
+    saveString(result, `${getExportFilename()}.stl`);
 }
 
 // OBJエクスポート
 function exportOBJ() {
-    if (!isInitialized || (params.fontType !== 'japanese' && !textMesh)) return;
+    if (!isInitialized || (currentMode === 'text' && params.fontType !== 'japanese' && !textMesh)) return;
     
     const exporter = new THREE.OBJExporter();
     const result = exporter.parse(textGroup);
     
-    saveString(result, `${params.text}.obj`);
+    saveString(result, `${getExportFilename()}.obj`);
 }
 
 // 透過PNGエクスポート
 function exportPNG() {
-    if (!isInitialized || (params.fontType !== 'japanese' && !textMesh)) return;
+    if (!isInitialized || (currentMode === 'text' && params.fontType !== 'japanese' && !textMesh)) return;
     
     // 解像度倍率を取得
     const resolutionScale = parseInt(pngResolutionSelect.value);
@@ -1289,7 +1520,7 @@ function exportPNG() {
     // ダウンロードリンクを作成
     const link = document.createElement('a');
     link.href = imgData;
-    link.download = `${params.text}_${resolutionScale}x.png`;
+    link.download = `${getExportFilename()}_${resolutionScale}x.png`;
     link.click();
     
     // レンダラーのサイズを元に戻す
@@ -1314,6 +1545,20 @@ function saveString(text, filename) {
     link.click();
     
     URL.revokeObjectURL(link.href);
+}
+
+// ファイル名を取得（エクスポート用）
+function getExportFilename() {
+    if (currentMode === 'text') {
+        return params.text;
+    } else {
+        const file = svgUpload.files[0];
+        if (file) {
+            // 拡張子を除いたファイル名を取得
+            return file.name.replace(/\.[^/.]+$/, "");
+        }
+        return 'model';
+    }
 }
 
 // ウィンドウリサイズ対応
@@ -1679,8 +1924,14 @@ function handleCustomTexture(event) {
                 // カスタムテクスチャを設定
                 params.customTexture = textures.custom;
                 
-                // テキストを再生成
-                createText();
+                // 現在のモードに応じて適切な処理を呼び出す
+                if (currentMode === 'text') {
+                    createText();
+                } else if (currentMode === 'svg') {
+                    if (window.lastLoadedSVG) {
+                        createSVGModel(window.lastLoadedSVG);
+                    }
+                }
             };
             image.src = e.target.result;
         };
