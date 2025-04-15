@@ -96,14 +96,30 @@ header p {
 .tab-content {
     width: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
+}
+
+.tab-content-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.text-input-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #text-input {
     width: 70%;
     padding: 10px 15px;
+    height: 40px;
     font-size: 1rem;
     border: 1px solid #ddd;
     border-radius: 4px 0 0 4px;
@@ -112,10 +128,11 @@ header p {
 
 /* SVGアップロード関連のスタイル */
 .svg-upload-container {
-    width: 70%;
+    width: 65%;
     display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 #svg-upload {
@@ -123,15 +140,20 @@ header p {
 }
 
 .svg-upload-label {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px 15px;
+    height: 40px;
     background-color: #1976D2;
     color: white;
-    border-radius: 4px;
+    border-radius: 4px 0 0 4px;
     cursor: pointer;
     text-align: center;
     transition: background-color 0.3s;
-    margin-bottom: 10px;
+    margin-right: 0;
+    flex-shrink: 0;
+    min-width: 160px;
 }
 
 .svg-upload-label:hover {
@@ -141,22 +163,46 @@ header p {
 #svg-filename {
     font-size: 0.9rem;
     color: #666;
-    margin-bottom: 10px;
-    text-align: center;
+    padding: 10px 15px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    background-color: #f5f5f5;
+    border-radius: 0 4px 4px 0;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid #e0e0e0;
+    border-left: none;
 }
 
 .svg-info {
-    width: 70%;
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #f5f5f5;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: rgba(25, 118, 210, 0.05);
     border-radius: 4px;
     font-size: 0.85rem;
     color: #666;
+    border: 1px solid rgba(25, 118, 210, 0.1);
 }
 
 .svg-info p {
-    margin: 5px 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.svg-info p:first-child::after {
+    content: '';
+    margin-left: 15px;
+    margin-right: 5px;
 }
 
 #generate-btn, #svg-generate-btn {
@@ -168,6 +214,10 @@ header p {
     cursor: pointer;
     font-size: 1rem;
     transition: background-color 0.3s;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #generate-btn:hover, #svg-generate-btn:hover {
@@ -176,7 +226,14 @@ header p {
 
 #svg-generate-btn {
     border-radius: 4px;
-    width: 30%;
+    width: 25%;
+    margin-left: auto;
+    min-width: 120px;
+    white-space: nowrap;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .view-container {

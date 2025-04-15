@@ -76,16 +76,20 @@
                 <button class="tab-btn" data-tab="svg-tab">ベクターデータ</button>
             </div>
             <div class="tab-content" id="text-tab">
-                <input type="text" id="text-input" value="箱モジ" placeholder="テキストを入力">
-                <button id="generate-btn">生成</button>
+                <div class="text-input-container">
+                    <input type="text" id="text-input" value="箱モジ" placeholder="テキストを入力">
+                    <button id="generate-btn">生成</button>
+                </div>
             </div>
             <div class="tab-content" id="svg-tab" style="display: none;">
-                <div class="svg-upload-container">
-                    <input type="file" id="svg-upload" accept=".svg">
-                    <label for="svg-upload" class="svg-upload-label">SVGファイルを選択</label>
-                    <span id="svg-filename">ファイルが選択されていません</span>
+                <div class="tab-content-row">
+                    <div class="svg-upload-container">
+                        <input type="file" id="svg-upload" accept=".svg">
+                        <label for="svg-upload" class="svg-upload-label">SVGファイルを選択</label>
+                        <span id="svg-filename">ファイルが選択されていません</span>
+                    </div>
+                    <button id="svg-generate-btn">SVGを3D化</button>
                 </div>
-                <button id="svg-generate-btn">SVGを3D化</button>
                 <div class="svg-info">
                     <p>対応形式: SVG</p>
                     <p>※複雑なSVGは処理に時間がかかる場合があります</p>
