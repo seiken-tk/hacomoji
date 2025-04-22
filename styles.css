@@ -954,3 +954,24 @@ header p {
         gap: 10px;
     }
 }
+
+/* 広告 スマホの場合は表示しない */
+@media (max-width: 767px) {
+    .ad-container-pc {
+        display: none;
+    }
+    
+    .ad-container-sp {
+        display: block;
+    }
+}
+/* 広告 PCの場合は表示しない */
+@media (min-width: 768px) {
+    .ad-container-pc {
+        display: block;
+    }
+    
+    .ad-container-sp {
+        display: none;
+    }
+}
