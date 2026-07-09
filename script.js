@@ -306,10 +306,7 @@ stopRecordingBtn.addEventListener('click', stopRecording);
 function init() {
     // Three.jsの初期化
     initThreeJS();
-    
-    // テクスチャの初期化
-    initTextures();
-    
+
     // フォントのロード
     loadFont();
     
@@ -349,9 +346,6 @@ function init() {
     
     // 折り畳みセクションの初期化
     initCollapsibleSections();
-    
-    // CCapture.jsの初期化
-    initCCapture();
 }
 
 // 折り畳みセクションの初期化
@@ -379,21 +373,13 @@ function initCollapsibleSections() {
     });
 }
 
-// テクスチャの初期化
-function initTextures() {
-    // 基本テクスチャをロード
-    textures.brick = textureLoader.load('images/brick.jpg');
-    textures.wood = textureLoader.load('images/wood.jpg');
-    textures.concrete = textureLoader.load('images/floor.jpg');
-    textures.fabric = textureLoader.load('images/grass.jpg');
-    
-    // テクスチャの繰り返し設定
-    Object.values(textures).forEach(texture => {
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(1, 1);
-    });
-}
+// テクスチャの画像ファイル（初回使用時に遅延読み込み）
+const textureFiles = {
+    brick: 'images/brick.jpg',
+    wood: 'images/wood.jpg',
+    concrete: 'images/floor.jpg',
+    fabric: 'images/grass.jpg'
+};
 
 // Three.jsの初期化
 function initThreeJS() {
@@ -416,7 +402,8 @@ function initThreeJS() {
         powerPreference: "high-performance"
     });
     renderer.setSize(getViewWidth(), getViewHeight());
-    renderer.setPixelRatio(isMobile ? Math.min(window.devicePixelRatio, 2) : window.devicePixelRatio);
+    // 高DPIディスプレイでの過剰なレンダリング負荷を防ぐため上限を2に制限
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     
     // レンダラーをDOMに追加
     const viewContainer = document.getElementById('three-d-view');
@@ -627,10 +614,24 @@ function updateFont() {
     loadFont();
 }
 
+// テキストグループを破棄処理付きでクリア（GPUメモリの解放）
+function clearTextGroup() {
+    textGroup.traverse(obj => {
+        if (obj.isMesh) {
+            obj.geometry.dispose();
+            // テクスチャ（material.map）はキャッシュして再利用するため破棄しない
+            if (obj.material && obj.material.dispose) {
+                obj.material.dispose();
+            }
+        }
+    });
+    textGroup.clear();
+}
+
 // テキストの作成
 function createText() {
     // 既存のテキストメッシュをクリア
-    textGroup.clear();
+    clearTextGroup();
     
     // 日本語フォントの場合
     if (params.fontType.startsWith('noto-sans-jp') ||
@@ -682,12 +683,24 @@ function createText() {
     isInitialized = true;
 }
 
+// 読み込み済み日本語フォントのキャッシュ（URL → opentype.Font）
+const japaneseFontCache = {};
+
 // 日本語テキストの作成（OpenType.jsを使用）
 function createJapaneseText() {
     const text = params.text;
     console.log('日本語テキスト作成:', text);
     if (!text) return;
-    
+
+    // 選択されたフォントに基づいてフォントURLを設定
+    const fontUrl = getJapaneseFontUrl();
+
+    // キャッシュ済みならダウンロードせずに即時生成
+    if (japaneseFontCache[fontUrl]) {
+        buildJapaneseText(japaneseFontCache[fontUrl]);
+        return;
+    }
+
     // ローディングアニメーションを表示
     const loadingContainer = document.createElement('div');
     loadingContainer.id = 'font-loading-container';
@@ -751,37 +764,6 @@ function createJapaneseText() {
     loadingContainer.appendChild(progressMessage);
     document.body.appendChild(loadingContainer);
     
-    // 選択されたフォントに基づいてフォントURLを設定
-    let fontUrl;
-    switch (params.fontType) {
-        case 'noto-sans-jp':
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@4.5.0/files/noto-sans-jp-japanese-400-normal.woff';
-            break;
-        case 'noto-serif-jp':
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-jp@4.5.0/files/noto-serif-jp-japanese-400-normal.woff';
-            break;
-        case 'mplus-1p':
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/m-plus-1p@4.5.0/files/m-plus-1p-japanese-400-normal.woff';
-            break;
-        case 'mplus-rounded-1c':
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/m-plus-rounded-1c@4.5.0/files/m-plus-rounded-1c-japanese-400-normal.woff';
-            break;
-        case 'kosugi-maru':
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/kosugi-maru@4.5.0/files/kosugi-maru-japanese-400-normal.woff';
-            break;
-        case 'kosugi':
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/kosugi@4.5.0/files/kosugi-japanese-400-normal.woff';
-            break;
-        case 'sawarabi-gothic':
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/sawarabi-gothic@4.5.0/files/sawarabi-gothic-japanese-400-normal.woff';
-            break;
-        case 'sawarabi-mincho':
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/sawarabi-mincho@4.5.0/files/sawarabi-mincho-japanese-400-normal.woff';
-            break;
-        default:
-            fontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@4.5.0/files/noto-sans-jp-japanese-400-normal.woff';
-    }
-    
     // 日本語フォントを読み込む
     opentype.load(fontUrl, function(err, font) {
         // ローディングコンテナを削除
@@ -829,91 +811,124 @@ function createJapaneseText() {
             console.error('フォントの読み込みに失敗しました:', err);
             return;
         }
-        
-        // 文字の配列
-        const characters = text.split('');
-        
-        // マテリアルの作成
-        const material = createMaterial();
-        
-        // 文字間のスペース
-        const spacing = params.size * params.letterSpacing;
-        
-        // 文字の幅を計算
-        const charWidths = [];
-        let totalWidth = 0;
-        
-        characters.forEach(char => {
-            // 文字のグリフを取得
-            const glyph = font.charToGlyph(char);
-            // 文字の幅を取得（フォントユニットからピクセルに変換）
-            const width = glyph.advanceWidth / font.unitsPerEm * params.size;
-            charWidths.push(width);
-            totalWidth += width + spacing;
-        });
-        
-        // 最後のスペースを引く
-        totalWidth -= spacing;
-        
-        // 開始位置（中央揃え）
-        let xPos = -totalWidth / 2;
-        
-        // 各文字の3Dオブジェクトを作成
-        characters.forEach((char, index) => {
-            // 文字のグリフを取得
-            const glyph = font.charToGlyph(char);
-            
-            // グリフのパスを取得
-            const path = glyph.getPath(0, 0, params.size);
-            
-            // パスをThree.jsのシェイプに変換
-            const shapes = createShapesFromPath(path);
-            
-            if (shapes.length > 0) {
-                // 押し出し設定
-                const extrudeSettings = {
-                    steps: 1,
-                    depth: params.depth,
-                    bevelEnabled: params.bevelEnabled,
-                    bevelThickness: params.bevelThickness,
-                    bevelSize: params.bevelSize,
-                    bevelSegments: 3,
-                    curveSegments: params.curveSegments
-                };
-                
-                // 各シェイプを押し出して3Dジオメトリを作成
-                shapes.forEach(shape => {
-                    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-                    
-                    // 変形が有効な場合、ジオメトリを変形
-                    if (params.transformEnabled) {
-                        applyTransformToGeometry(geometry);
-                    }
-                    
-                    // メッシュの作成
-                    const charMesh = new THREE.Mesh(geometry, material);
-                    
-                    // 位置の設定
-                    charMesh.position.x = xPos;
-                    // Y軸を反転（OpenTypeとThree.jsの座標系の違いを調整）
-                    charMesh.rotation.x = Math.PI;
-                    // 文字メッシュを前面に表示するためにrenderOrderを設定
-                    charMesh.renderOrder = 2;
-                    
-                    // 影の設定は削除
-                    
-                    // グループに追加
-                    textGroup.add(charMesh);
-                });
-            }
-            
-            // 次の文字の位置を更新
-            xPos += charWidths[index] + spacing;
-        });
-        
-        // 初期化完了
-        isInitialized = true;
+
+        // キャッシュに保存して次回以降のダウンロードを省略
+        japaneseFontCache[fontUrl] = font;
+
+        buildJapaneseText(font);
     });
+}
+
+// 選択中の日本語フォントのURLを返す
+function getJapaneseFontUrl() {
+    switch (params.fontType) {
+        case 'noto-serif-jp':
+            return 'https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-jp@4.5.0/files/noto-serif-jp-japanese-400-normal.woff';
+        case 'mplus-1p':
+            return 'https://cdn.jsdelivr.net/npm/@fontsource/m-plus-1p@4.5.0/files/m-plus-1p-japanese-400-normal.woff';
+        case 'mplus-rounded-1c':
+            return 'https://cdn.jsdelivr.net/npm/@fontsource/m-plus-rounded-1c@4.5.0/files/m-plus-rounded-1c-japanese-400-normal.woff';
+        case 'kosugi-maru':
+            return 'https://cdn.jsdelivr.net/npm/@fontsource/kosugi-maru@4.5.0/files/kosugi-maru-japanese-400-normal.woff';
+        case 'kosugi':
+            return 'https://cdn.jsdelivr.net/npm/@fontsource/kosugi@4.5.0/files/kosugi-japanese-400-normal.woff';
+        case 'sawarabi-gothic':
+            return 'https://cdn.jsdelivr.net/npm/@fontsource/sawarabi-gothic@4.5.0/files/sawarabi-gothic-japanese-400-normal.woff';
+        case 'sawarabi-mincho':
+            return 'https://cdn.jsdelivr.net/npm/@fontsource/sawarabi-mincho@4.5.0/files/sawarabi-mincho-japanese-400-normal.woff';
+        case 'noto-sans-jp':
+        default:
+            return 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-jp@4.5.0/files/noto-sans-jp-japanese-400-normal.woff';
+    }
+}
+
+// 読み込み済みフォントから日本語テキストの3Dモデルを構築する
+function buildJapaneseText(font) {
+    const text = params.text;
+
+    // 文字の配列
+    const characters = text.split('');
+    
+    // マテリアルの作成
+    const material = createMaterial();
+    
+    // 文字間のスペース
+    const spacing = params.size * params.letterSpacing;
+    
+    // 文字の幅を計算
+    const charWidths = [];
+    let totalWidth = 0;
+    
+    characters.forEach(char => {
+        // 文字のグリフを取得
+        const glyph = font.charToGlyph(char);
+        // 文字の幅を取得（フォントユニットからピクセルに変換）
+        const width = glyph.advanceWidth / font.unitsPerEm * params.size;
+        charWidths.push(width);
+        totalWidth += width + spacing;
+    });
+    
+    // 最後のスペースを引く
+    totalWidth -= spacing;
+    
+    // 開始位置（中央揃え）
+    let xPos = -totalWidth / 2;
+    
+    // 各文字の3Dオブジェクトを作成
+    characters.forEach((char, index) => {
+        // 文字のグリフを取得
+        const glyph = font.charToGlyph(char);
+        
+        // グリフのパスを取得
+        const path = glyph.getPath(0, 0, params.size);
+        
+        // パスをThree.jsのシェイプに変換
+        const shapes = createShapesFromPath(path);
+        
+        if (shapes.length > 0) {
+            // 押し出し設定
+            const extrudeSettings = {
+                steps: 1,
+                depth: params.depth,
+                bevelEnabled: params.bevelEnabled,
+                bevelThickness: params.bevelThickness,
+                bevelSize: params.bevelSize,
+                bevelSegments: 3,
+                curveSegments: params.curveSegments
+            };
+            
+            // 各シェイプを押し出して3Dジオメトリを作成
+            shapes.forEach(shape => {
+                const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+                
+                // 変形が有効な場合、ジオメトリを変形
+                if (params.transformEnabled) {
+                    applyTransformToGeometry(geometry);
+                }
+                
+                // メッシュの作成
+                const charMesh = new THREE.Mesh(geometry, material);
+                
+                // 位置の設定
+                charMesh.position.x = xPos;
+                // Y軸を反転（OpenTypeとThree.jsの座標系の違いを調整）
+                charMesh.rotation.x = Math.PI;
+                // 文字メッシュを前面に表示するためにrenderOrderを設定
+                charMesh.renderOrder = 2;
+                
+                // 影の設定は削除
+                
+                // グループに追加
+                textGroup.add(charMesh);
+            });
+        }
+        
+        // 次の文字の位置を更新
+        xPos += charWidths[index] + spacing;
+    });
+
+    // 初期化完了
+    isInitialized = true;
 }
 
 // OpenType.jsのパスからThree.jsのシェイプを作成
@@ -1017,12 +1032,21 @@ function createMaterial() {
     return material;
 }
 
-// 選択されたテクスチャを取得
+// 選択されたテクスチャを取得（未読み込みならここで読み込む）
 function getSelectedTexture() {
     if (params.textureType === 'custom' && params.customTexture) {
         return textures.custom;
     }
-    return textures[params.textureType];
+    const type = params.textureType;
+    if (!textures[type] && textureFiles[type]) {
+        // 読み込み完了後はanimateループで自動的に反映される
+        const texture = textureLoader.load(textureFiles[type]);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(1, 1);
+        textures[type] = texture;
+    }
+    return textures[type];
 }
 
 // テクスチャの更新
@@ -1164,7 +1188,6 @@ function processSVG() {
                 alert('SVGファイルを選択してください');
             });
         return;
-        return;
     }
     
     // ローディングアニメーションを表示
@@ -1236,7 +1259,7 @@ function processSVG() {
 // SVGデータから3Dモデルを作成
 function createSVGModel(svgData) {
     // 既存のテキストメッシュをクリア
-    textGroup.clear();
+    clearTextGroup();
     
     // SVGデータをパース
     const svgPaths = svgLoader.parse(svgData);
@@ -1449,7 +1472,7 @@ function updateTransform() {
 
 // STLエクスポート
 function exportSTL() {
-    if (!isInitialized || (currentMode === 'text' && params.fontType !== 'japanese' && !textMesh)) return;
+    if (!isInitialized || textGroup.children.length === 0) return;
     
     const exporter = new THREE.STLExporter();
     const result = exporter.parse(textGroup);
@@ -1459,7 +1482,7 @@ function exportSTL() {
 
 // OBJエクスポート
 function exportOBJ() {
-    if (!isInitialized || (currentMode === 'text' && params.fontType !== 'japanese' && !textMesh)) return;
+    if (!isInitialized || textGroup.children.length === 0) return;
     
     const exporter = new THREE.OBJExporter();
     const result = exporter.parse(textGroup);
@@ -1469,7 +1492,7 @@ function exportOBJ() {
 
 // 透過PNGエクスポート
 function exportPNG() {
-    if (!isInitialized || (currentMode === 'text' && params.fontType !== 'japanese' && !textMesh)) return;
+    if (!isInitialized || textGroup.children.length === 0) return;
     
     // 解像度倍率を取得
     const resolutionScale = parseInt(pngResolutionSelect.value);
@@ -1568,9 +1591,10 @@ function getAspectRatio() {
     return getViewWidth() / getViewHeight();
 }
 
-// モバイルデバイスの検出
+// モバイルデバイスの検出（UA判定は毎フレーム呼ばれるため一度だけ実行してキャッシュ）
+const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 function isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+    return isMobileUA || window.innerWidth < 768;
 }
 
 // グリッドの表示/非表示を切り替える
@@ -1747,23 +1771,51 @@ function updateVideoSettings() {
     params.videoDuration = parseInt(videoDurationSlider.value);
 }
 
-// CCapture.jsの初期化
-function initCCapture() {
-    // CCapture.jsのスクリプトを動的に読み込む
-    const ccaptureScript = document.createElement('script');
-    ccaptureScript.src = 'https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js';
-    document.head.appendChild(ccaptureScript);
-    
-    // WebMエンコーダーのスクリプトを動的に読み込む
-    const webmScript = document.createElement('script');
-    webmScript.src = 'https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/src/webm-writer-0.2.0.js';
-    document.head.appendChild(webmScript);
+// スクリプトをSRI検証付きで動的に読み込む
+function loadScript(src, integrity) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.integrity = integrity;
+        script.crossOrigin = 'anonymous';
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`${src} の読み込みに失敗しました`));
+        document.head.appendChild(script);
+    });
+}
+
+// CCapture.jsの読み込み（録画開始時に一度だけ読み込む）
+let ccapturePromise = null;
+function loadCCapture() {
+    if (!ccapturePromise) {
+        ccapturePromise = Promise.all([
+            loadScript(
+                'https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js',
+                'sha384-pX8+MdJDFHanQqmT/W7sedg6GzbDwjkVpHUHUBAz5ZQu2Zrf+WRsGFkdpCxtGqiO'
+            ),
+            loadScript(
+                'https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/src/webm-writer-0.2.0.js',
+                'sha384-I31/YKbmYGVlfLlQ3jafOubOgmvdS/vedn8c+qj7M3LL9sVID1/FW0zoZAPGtp02'
+            )
+        ]);
+    }
+    return ccapturePromise;
 }
 
 // 録画開始
-function startRecording() {
+async function startRecording() {
     if (!isInitialized || isRecording) return;
-    
+
+    // 録画ライブラリを読み込む（初回のみダウンロード）
+    try {
+        await loadCCapture();
+    } catch (e) {
+        console.error(e);
+        ccapturePromise = null;
+        alert('録画ライブラリの読み込みに失敗しました。通信環境をご確認ください。');
+        return;
+    }
+
     // 回転が有効でない場合は有効にする
     if (!params.rotationEnabled) {
         params.rotationEnabled = true;

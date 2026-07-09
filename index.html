@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ハコモジ（hacomoji） - 3Dテキストモデリングサービス</title>
 
-    <link rel="shortcut icon" href="./images/favicon.png" type="image/x-icon">
+    <link rel="icon" href="./images/favicon.png" type="image/png">
+
+    <!-- 外部リソースへの事前接続 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     
     <!-- メタタグ -->
     <meta name="description" content="ハコモジ（hacomoji）は、テキストを3Dモデルで表示・出力できるオンラインジェネレーターです。STL、OBJ、PNG形式でエクスポートでき、3Dプリント用データの作成も簡単です。">
@@ -29,13 +34,10 @@
     <meta name="twitter:description" content="テキストを3Dモデルで表示・出力できるオンラインジェネレーター。">
     <meta name="twitter:image" content="https://hacomoji.com/images/hacomoji-title.png">
     
-    <link rel="stylesheet" href="styles.css">
-    <!-- Google Fonts - 英字フォント -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Google Fonts - 日本語フォント -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=M+PLUS+1p:wght@400;700&family=M+PLUS+Rounded+1c:wght@400;700&family=Kosugi+Maru&family=Sawarabi+Gothic&family=Sawarabi+Mincho&family=Kosugi&display=swap" rel="stylesheet">
-    
+    <link rel="stylesheet" href="styles.css?ver=20260709-1">
+    <!-- Google Fonts - ページ表示用フォント（3D用フォントはopentype.jsで別途読み込み） -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+
     <!-- 構造化データ -->
     <script type="application/ld+json">
     {
@@ -65,9 +67,9 @@
 <body>
     <div class="container">
         <header>
-            <h1><img src="./images/hacomoji-logo.png" alt="箱モジ hacomoji" width="350px"></h1>
+            <h1><img src="./images/hacomoji-logo.png" alt="箱モジ hacomoji" width="350" height="115" fetchpriority="high"></h1>
             <p>テキスト専用3Dモデリングサービス「ハコモジ」</p>
-            <p>テキストを3Dモデルで表示・出力（ただし中に空間のある日本語は埋まります...）</p>
+            <p>テキストを3Dモデルで表示・出力。STL・OBJ・PNG形式でエクスポートできます</p>
         </header>
         
         <div class="input-section">
@@ -100,8 +102,6 @@
         <div class="view-container">
             <div id="three-d-view"></div>
             <aside class="ad-container-pc">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0236602375679125"
-                    crossorigin="anonymous"></script>
                 <!-- hacomoji -->
                 <ins class="adsbygoogle"
                     style="display:block"
@@ -470,8 +470,6 @@
                 </div>
             </div>
             <aside class="ad-container-sp">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0236602375679125"
-                    crossorigin="anonymous"></script>
                 <!-- hacomoji -->
                 <ins class="adsbygoogle"
                     style="display:block"
@@ -486,22 +484,21 @@
         </div>
     </div>
     
-    <!-- Three.js ライブラリ -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/FontLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/geometries/TextGeometry.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/SVGLoader.js"></script>
-    
+    <!-- Three.js ライブラリ（SRIで改ざん検証） -->
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js" integrity="sha384-wk3tumnswoFqlP7kW7A1Pb8Uvy1efw6DJMuVYoV9VZD5iSXi/iN2zdl8Gz0f4HPF" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js" integrity="sha384-mILeTdmegYZNgUMx0H7JOtQKAERnHeBnM2wRe6kW4pPSlBgGAemoAPsUDbbOfdoE" crossorigin="anonymous"></script>
+    <!-- FontLoader/TextGeometryはr132ではthree.min.js本体に含まれるため個別読み込み不要 -->
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/SVGLoader.js" integrity="sha384-GYYg6WZZ5XkKe4O2zs654kzWe8O5em+oMMQ8KHvXPztpZyDsxAocld4+FpG5DW+6" crossorigin="anonymous"></script>
+
     <!-- フォント処理ライブラリ -->
-    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
-    
+    <script defer src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js" integrity="sha384-3TaxGqyHrMuRIWY5Z5WHNIzgNRqGIUJE+mk6tm+g1wkm9Ux2kUyOLfy9AsNWXA6u" crossorigin="anonymous"></script>
+
     <!-- エクスポート用ライブラリ -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/STLExporter.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/OBJExporter.js"></script>
-    
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/STLExporter.js" integrity="sha384-4hnpAxcCdErKDH3j3vbC5jLfELShp3G/uQ8o7uSSQomOoxn3G3o083Azy+tj0/VT" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/OBJExporter.js" integrity="sha384-JeqUgP57sqXqWMUttAxjWJXn0uy3ZXe9PBFr7VIUSPhnpALu7D2tNpIipzmV2Vu3" crossorigin="anonymous"></script>
+
     <!-- メインスクリプト -->
-    <script src="script.js?ver=20260709-1"></script>
+    <script defer src="script.js?ver=20260709-2"></script>
     
     <!-- フッター -->
     <footer class="footer">
