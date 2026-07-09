@@ -917,65 +917,48 @@ function createJapaneseText() {
 }
 
 // OpenType.jsのパスからThree.jsのシェイプを作成
+// 輪郭をShapePathにまとめ、SVGLoader.createShapesで外形と穴（「口」の内側など）を判定する
 function createShapesFromPath(path) {
-    const shapes = [];
-    let currentShape = new THREE.Shape();
-    let currentPosition = { x: 0, y: 0 };
-    let firstPosition = null;
-    
+    const shapePath = new THREE.ShapePath();
+
     // パスのコマンドを処理
     path.commands.forEach(cmd => {
         switch (cmd.type) {
             case 'M': // 移動
-                if (firstPosition !== null) {
-                    // 前のシェイプを閉じて新しいシェイプを開始
-                    shapes.push(currentShape);
-                    currentShape = new THREE.Shape();
-                }
-                currentPosition = { x: cmd.x, y: cmd.y };
-                firstPosition = { x: cmd.x, y: cmd.y };
-                currentShape.moveTo(cmd.x, cmd.y);
+                shapePath.moveTo(cmd.x, cmd.y);
                 break;
-                
+
             case 'L': // 直線
-                currentPosition = { x: cmd.x, y: cmd.y };
-                currentShape.lineTo(cmd.x, cmd.y);
+                shapePath.lineTo(cmd.x, cmd.y);
                 break;
-                
+
             case 'C': // 3次ベジェ曲線
-                currentPosition = { x: cmd.x, y: cmd.y };
-                currentShape.bezierCurveTo(
+                shapePath.bezierCurveTo(
                     cmd.x1, cmd.y1,
                     cmd.x2, cmd.y2,
                     cmd.x, cmd.y
                 );
                 break;
-                
+
             case 'Q': // 2次ベジェ曲線
-                currentPosition = { x: cmd.x, y: cmd.y };
-                currentShape.quadraticCurveTo(
+                shapePath.quadraticCurveTo(
                     cmd.x1, cmd.y1,
                     cmd.x, cmd.y
                 );
                 break;
-                
+
             case 'Z': // 閉じる
-                if (firstPosition !== null) {
-                    currentShape.closePath();
-                    shapes.push(currentShape);
-                    currentShape = new THREE.Shape();
-                    firstPosition = null;
+                if (shapePath.currentPath) {
+                    shapePath.currentPath.closePath();
                 }
                 break;
         }
     });
-    
-    // 最後のシェイプが追加されていない場合は追加
-    if (firstPosition !== null && currentShape.curves.length > 0) {
-        shapes.push(currentShape);
-    }
-    
-    return shapes;
+
+    // フォントの塗りつぶしはnonzeroルールで判定する
+    shapePath.userData = { style: { fillRule: 'nonzero' } };
+
+    return THREE.SVGLoader.createShapes(shapePath);
 }
 
 // マテリアルの作成
