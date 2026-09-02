@@ -432,6 +432,9 @@ function initThreeJS() {
     controls.enableZoom = true;
     controls.enablePan = true;
     controls.rotateSpeed = isMobile ? 0.7 : 1.0;
+    // ホイールズーム時はOrbitControls内部でupdate()が呼ばれ、描画ループ側のupdate()が
+    // 「変化なし」と判定して再描画をスキップしてしまうため、changeイベントで再描画を要求する
+    controls.addEventListener('change', requestRender);
     controls.update();
 
     // 光源の追加
