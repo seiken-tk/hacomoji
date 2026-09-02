@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1976D2">
     <title>ハコモジ（hacomoji） - 3Dテキストモデリングサービス</title>
 
     <link rel="icon" href="./images/favicon.png" type="image/png">
@@ -25,6 +26,8 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://hacomoji.com/">
     <meta property="og:image" content="https://hacomoji.com/images/hacomoji-title.png">
+    <meta property="og:image:width" content="824">
+    <meta property="og:image:height" content="206">
     <meta property="og:site_name" content="ハコモジ（hacomoji）">
     <meta property="og:locale" content="ja_JP">
     
@@ -34,7 +37,7 @@
     <meta name="twitter:description" content="テキストを3Dモデルで表示・出力できるオンラインジェネレーター。">
     <meta name="twitter:image" content="https://hacomoji.com/images/hacomoji-title.png">
     
-    <link rel="stylesheet" href="styles.css?ver=20260709-1">
+    <link rel="stylesheet" href="styles.css?ver=20260902-1">
     <!-- Google Fonts - ページ表示用フォント（3D用フォントはopentype.jsで別途読み込み） -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 
@@ -73,13 +76,13 @@
         </header>
         
         <div class="input-section">
-            <div class="input-tabs">
-                <button class="tab-btn active" data-tab="text-tab">テキスト</button>
-                <button class="tab-btn" data-tab="svg-tab">ベクターデータ</button>
+            <div class="input-tabs" role="tablist">
+                <button class="tab-btn active" data-tab="text-tab" role="tab" aria-selected="true" aria-controls="text-tab">テキスト</button>
+                <button class="tab-btn" data-tab="svg-tab" role="tab" aria-selected="false" aria-controls="svg-tab">ベクターデータ</button>
             </div>
             <div class="tab-content" id="text-tab">
                 <div class="text-input-container">
-                    <input type="text" id="text-input" value="箱モジ" placeholder="テキストを入力">
+                    <input type="text" id="text-input" value="箱モジ" placeholder="テキストを入力" maxlength="100" autocomplete="off" aria-label="3D化するテキスト">
                     <button id="generate-btn">生成</button>
                 </div>
             </div>
@@ -117,9 +120,9 @@
             <div class="controls">
                 <!-- 形状セクション（旧パラメーターセクション） -->
                 <div class="collapsible-section">
-                    <div class="section-header open" data-section="parameters">
+                    <div class="section-header open" data-section="parameters" role="button" tabindex="0" aria-expanded="true" aria-controls="parameters-content">
                         <h3>形状</h3>
-                        <span class="toggle-icon">▼</span>
+                        <span class="toggle-icon" aria-hidden="true">▼</span>
                     </div>
                     <div class="section-content" id="parameters-content">
                         <div class="control-item">
@@ -166,7 +169,7 @@
                         <!-- 文字変形コントロール -->
                         <div class="control-item">
                             <label for="transform-enabled">文字変形:</label>
-                            <input type="checkbox" id="transform-enabled">
+                            <input type="checkbox" id="transform-enabled" checked>
                         </div>
                         
                         <div class="control-item transform-control">
@@ -226,9 +229,9 @@
                 
                 <!-- 色・テクスチャセクション（旧テクスチャセクション） -->
                 <div class="collapsible-section">
-                    <div class="section-header" data-section="textures">
+                    <div class="section-header" data-section="textures" role="button" tabindex="0" aria-expanded="false" aria-controls="textures-content">
                         <h3>色・テクスチャ</h3>
-                        <span class="toggle-icon">▶</span>
+                        <span class="toggle-icon" aria-hidden="true">▶</span>
                     </div>
                     <div class="section-content" id="textures-content" style="display: none;">
                         <div class="control-item">
@@ -299,9 +302,9 @@
                 
                 <!-- 光源セクション -->
                 <div class="collapsible-section">
-                    <div class="section-header" data-section="lights">
+                    <div class="section-header" data-section="lights" role="button" tabindex="0" aria-expanded="false" aria-controls="lights-content">
                         <h3>光源</h3>
-                        <span class="toggle-icon">▶</span>
+                        <span class="toggle-icon" aria-hidden="true">▶</span>
                     </div>
                     <div class="section-content" id="lights-content" style="display: none;">
                         
@@ -393,9 +396,9 @@
                 
                 <!-- 回転アニメーションセクション -->
                 <div class="collapsible-section">
-                    <div class="section-header" data-section="rotation">
+                    <div class="section-header" data-section="rotation" role="button" tabindex="0" aria-expanded="false" aria-controls="rotation-content">
                         <h3>回転アニメーション</h3>
-                        <span class="toggle-icon">▶</span>
+                        <span class="toggle-icon" aria-hidden="true">▶</span>
                     </div>
                     <div class="section-content" id="rotation-content" style="display: none;">
                         <div class="control-item">
@@ -450,7 +453,7 @@
                             <button id="start-recording" class="video-button">録画開始</button>
                             <button id="stop-recording" class="video-button" disabled>録画停止</button>
                         </div>
-                        <p class="video-info">1周すると自動的に録画が停止され、動画がダウンロードされます。</p>
+                        <p class="video-info">設定した長さでちょうど1周する動画を出力します。1周すると自動的に録画が停止され、動画（WebM）がダウンロードされます。</p>
                     </div>
                 </div>
                 
@@ -498,7 +501,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/exporters/OBJExporter.js" integrity="sha384-JeqUgP57sqXqWMUttAxjWJXn0uy3ZXe9PBFr7VIUSPhnpALu7D2tNpIipzmV2Vu3" crossorigin="anonymous"></script>
 
     <!-- メインスクリプト -->
-    <script defer src="script.js?ver=20260709-2"></script>
+    <script defer src="script.js?ver=20260902-1"></script>
     
     <!-- フッター -->
     <footer class="footer">

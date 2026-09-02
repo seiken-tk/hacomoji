@@ -41,7 +41,8 @@ header {
     margin-bottom: 30px;
 }
 
-header h1 {
+header h1,
+header .site-logo {
     font-size: 2.5rem;
     color: #1976D2;
     margin-bottom: 5px;
@@ -349,6 +350,11 @@ header p {
 
 .section-header:hover {
     background-color: rgba(25, 118, 210, 0.05);
+}
+
+.section-header:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: -2px;
 }
 
 .section-header:hover::before {
@@ -688,9 +694,9 @@ header p {
     text-overflow: clip; /* 省略記号を表示しない */
 }
 
-/* 回転コントロールは常に表示 */
+/* 回転コントロールは常に表示（control-itemと同じgridレイアウト） */
 .rotation-control {
-    display: flex;
+    display: grid;
 }
 
 /* 動画ボタンのスタイル */
@@ -973,5 +979,96 @@ header p {
     
     .ad-container-sp {
         display: none;
+    }
+}
+
+/* ローディング表示（画面中央に固定） */
+.loading-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: min(300px, 90vw);
+    padding: 25px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(25, 118, 210, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.loading-message {
+    color: var(--primary-color);
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+    border: 6px solid #f3f3f3;
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-sub {
+    color: var(--text-light);
+    font-size: 14px;
+    margin-top: 15px;
+    font-style: italic;
+}
+
+/* 一時的な通知メッセージ */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    max-width: 90vw;
+    padding: 10px 20px;
+    color: #fff;
+    background-color: rgba(76, 175, 80, 0.95);
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeInOut 2.5s forwards;
+}
+
+.toast-error {
+    background-color: rgba(229, 57, 53, 0.95);
+    animation-duration: 4s;
+}
+
+/* 3Dビュー内の致命的エラー表示 */
+.fatal-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+    text-align: center;
+    color: #c62828;
+    line-height: 1.8;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-spinner {
+        animation-duration: 3s;
     }
 }
